@@ -43,7 +43,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
-        <ThemedText type="title">ArcWallet</ThemedText>
+        <ThemedText type="title">sovport</ThemedText>
         <ThemedText themeColor="textSecondary">Sign in to your identity</ThemedText>
 
         <View style={styles.form}>

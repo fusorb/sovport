@@ -1,6 +1,6 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -38,7 +38,7 @@ export default function RegisterScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
         <ThemedText type="title">Create account</ThemedText>
-        <ThemedText themeColor="textSecondary">Join ArcID and hold your credentials</ThemedText>
+        <ThemedText themeColor="textSecondary">Join SovGrant and hold your credentials</ThemedText>
 
         <View style={styles.form}>
           <TextInput

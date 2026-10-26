@@ -1,16 +1,16 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { useAuthStore } from '@/stores/auth-store';
-import { credentialService } from '@/services/credentials';
 import { authService } from '@/services/auth';
+import { credentialService } from '@/services/credentials';
 import { walletDidService } from '@/services/wallet-did';
-import type { Credential } from '@arcevo/facet-sdk';
+import { useAuthStore } from '@/stores/auth-store';
+import type { Credential } from '@fusorb/facet-sdk';
 
 export default function WalletHomeScreen() {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function WalletHomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <ThemedView style={styles.header}>
-          <ThemedText type="title">ArcWallet</ThemedText>
+          <ThemedText type="title">sovport</ThemedText>
           <ThemedText themeColor="textSecondary">
             {isAuthenticated && user ? `Signed in as ${user.name || user.email}` : 'Not signed in'}
           </ThemedText>

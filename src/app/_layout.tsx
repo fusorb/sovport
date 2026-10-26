@@ -1,12 +1,11 @@
-import { useEffect } from 'react';
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter, useSegments } from 'expo-router';
 import * as SplashScreenExpo from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { sgClient } from '@/sdk';
 import { useAuthStore } from '@/stores/auth-store';
-import { arcIdClient } from '@/services/api-client';
 
 SplashScreenExpo.preventAutoHideAsync();
 
@@ -40,7 +39,7 @@ export default function RootLayout() {
   useEffect(() => {
     restore().then((restored) => {
       if (restored) {
-        arcIdClient.setAccessToken(useAuthStore.getState().accessToken);
+        sgClient.setAccessToken(useAuthStore.getState().accessToken);
       }
     });
   }, [restore]);

@@ -1,21 +1,21 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { useAuthStore } from '@/stores/auth-store';
 import { credentialService } from '@/services/credentials';
 import { getDeviceDid, presentCredential } from '@/services/presentation';
-import type { Credential } from '@arcevo/facet-sdk';
+import { useAuthStore } from '@/stores/auth-store';
+import type { Credential } from '@fusorb/facet-sdk';
 
 /**
  * Presentation screen — reached via the deep link
- * `arcwallet://present?sessionId=…&challenge=…` (from ArcVerify's QR code
+ * `sovport://present?sessionId=…&challenge=…` (from ArcVerify's QR code
  * or deep link). The holder picks a credential, signs a detached JWS
- * proof with their on-device key, and ArcID verifies it.
+ * proof with their on-device key, and SovGrant verifies it.
  */
 export default function PresentScreen() {
   const router = useRouter();

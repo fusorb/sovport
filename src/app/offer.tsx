@@ -1,16 +1,16 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { useAuthStore } from '@/stores/auth-store';
 import { credentialService } from '@/services/credentials';
+import { useAuthStore } from '@/stores/auth-store';
 
 /**
- * Offer accept screen — reached via the deep link `arcwallet://offer?token=…`
+ * Offer accept screen — reached via the deep link `sovport://offer?token=…`
  * (the token is the one-time offer token from the issuer). Confirms with the
  * user, calls VcSdk.acceptOffer, then returns to the wallet home.
  */

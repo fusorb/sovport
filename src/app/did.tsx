@@ -1,17 +1,17 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { useAuthStore } from '@/stores/auth-store';
 import { walletDidService } from '@/services/wallet-did';
+import { useAuthStore } from '@/stores/auth-store';
 
 /**
  * DID registration screen — shown on first launch after sign-in.
- * Registers the device's did:key with ArcID (public key only, non-custodial)
+ * Registers the device's did:key with SovGrant (public key only, non-custodial)
  * so the wallet can present credentials for verification.
  */
 export default function DidScreen() {
@@ -62,8 +62,8 @@ export default function DidScreen() {
       <ThemedView style={styles.container}>
         <ThemedText type="title">Your wallet identity</ThemedText>
         <ThemedText themeColor="textSecondary">
-          ArcWallet uses a device-held key to sign verifiable presentations.
-          Register it with ArcID so verifiers can resolve your identity — your
+          sovport uses a device-held key to sign verifiable presentations.
+          Register it with SovGrant so verifiers can resolve your identity — your
           private key never leaves this device.
         </ThemedText>
 

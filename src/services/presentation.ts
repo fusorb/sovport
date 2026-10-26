@@ -1,12 +1,12 @@
-import * as SecureStore from "expo-secure-store";
-import { CompactSign } from "jose";
 import { credentials } from "@/sdk";
 import { useAuthStore } from "@/stores/auth-store";
+import * as SecureStore from "expo-secure-store";
+import { CompactSign } from "jose";
 
-const WALLET_KEYPAIR_STORAGE_KEY = "arcwallet-signing-key";
+const WALLET_KEYPAIR_STORAGE_KEY = "sovport-signing-key";
 
 /**
- * Presentation service — implements the ArcID verification protocol
+ * Presentation service — implements the SovGrant verification protocol
  * (docs/planning/presentation-envelope-design.md).
  *
  *   ArcVerify creates a session -> wallet signs a detached JWS binding
@@ -18,7 +18,7 @@ const WALLET_KEYPAIR_STORAGE_KEY = "arcwallet-signing-key";
  *   Detached form:    "header..signature" (payload omitted, verifier rebuilds it)
  *
  * The signing key is generated and held on-device (secure store); only
- * the public JWK is ever sent to ArcID (via registerWalletDid) — ArcID
+ * the public JWK is ever sent to SovGrant (via registerWalletDid) — SovGrant
  * never custodies the private key.
  */
 
@@ -51,7 +51,7 @@ async function getOrCreateSigningKey(): Promise<CryptoKeyPair> {
   return keyPair;
 }
 
-/** The public JWK for this device — send to ArcID via registerWalletDid. */
+/** The public JWK for this device — send to SovGrant via registerWalletDid. */
 export async function getPublicKeyJwk(): Promise<JsonWebKey> {
   const keyPair = await getOrCreateSigningKey();
   return crypto.subtle.exportKey("jwk", keyPair.publicKey);
