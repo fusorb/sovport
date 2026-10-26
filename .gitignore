@@ -39,8 +39,12 @@ yarn-error.*
 example
 
 # snapshot generator output
-arcwallet_codebase_snapshot.txt
+sovport_codebase_snapshot.txt
 
 # generated native folders
 /ios
 /android
+
+# agent local state (not part of the product repo)
+.agent/
+.commandcode/

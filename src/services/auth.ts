@@ -1,10 +1,9 @@
-import { auth } from "@/sdk";
-import { arcIdClient } from "@/services/api-client";
+import { auth, sgClient } from "@/sdk";
 import { useAuthStore } from "@/stores/auth-store";
 
 /**
  * Auth service — thin wrapper over AuthSdk that keeps the Zustand auth
- * store and the ArcIdClient bearer token in sync, and persists sessions
+ * store and the sgClient bearer token in sync, and persists sessions
  * to the secure store.
  */
 export const authService = {
@@ -13,7 +12,7 @@ export const authService = {
     if (result.data?.accessToken) {
       const { identity, accessToken, refreshToken, sessionId } = result.data;
       useAuthStore.getState().setAuth(identity, accessToken, refreshToken ?? "", sessionId);
-      arcIdClient.setAccessToken(accessToken);
+      sgClient.setAccessToken(accessToken);
       await useAuthStore.getState().persist();
     }
     return result;
@@ -37,7 +36,7 @@ export const authService = {
       } else {
         useAuthStore.getState().setTokens(accessToken, refreshToken);
       }
-      arcIdClient.setAccessToken(accessToken);
+      sgClient.setAccessToken(accessToken);
       await useAuthStore.getState().persist();
     }
     return result;
@@ -46,7 +45,7 @@ export const authService = {
   async logout() {
     const { sessionId } = useAuthStore.getState();
     await auth.logout(sessionId ?? "").catch(() => {});
-    arcIdClient.setAccessToken(null);
+    sgClient.setAccessToken(null);
     useAuthStore.getState().clearAuth();
   },
 
@@ -56,7 +55,7 @@ export const authService = {
     const result = await auth.refresh(state.refreshToken);
     if (result.data?.accessToken) {
       useAuthStore.getState().setTokens(result.data.accessToken, result.data.refreshToken);
-      arcIdClient.setAccessToken(result.data.accessToken);
+      sgClient.setAccessToken(result.data.accessToken);
       await useAuthStore.getState().persist();
     }
     return result;

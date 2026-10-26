@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = __dirname;
-const OUTPUT = path.join(ROOT, "arcwallet_codebase_snapshot.txt");
+const OUTPUT = path.join(ROOT, "sovport_codebase_snapshot.txt");
 const IGNORE_DIRS = new Set([
   "node_modules",
   ".expo",
@@ -19,7 +19,7 @@ const IGNORE_FILES = new Set([
   ".gitignore",
   ".npmrc",
   "pnpm-lock.yaml",
-  "arcwallet_codebase_snapshot.txt",
+  "sovport_codebase_snapshot.txt",
   "package-lock.json",
   "yarn.lock",
 ]);
