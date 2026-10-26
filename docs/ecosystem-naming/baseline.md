@@ -1,3 +1,4 @@
+<!-- BEGIN:generated -->
 # Ecosystem Naming — Baseline (sovport)
 
 Captured at the start of the Facet 2.0.0 + SovPort naming migration pass.

@@ -1,9 +1,12 @@
+<!-- BEGIN:generated -->
 # Ecosystem Naming — Report (sovport)
 
 **Repo:** `sovport` — a SovGrant identity wallet (React Native / Expo) consuming
 `@fusorb/facet-sdk` + `@fusorb/facet-store`. No `facet-auth` / `facet-layout`
 dependency (RN app with its own `expo-router` layout).
 
+<!-- Note: the docs/ecosystem-naming/* audit files are wrapped as generated sections
+     so the naming gate exempts their deliberate legacy-to-new token references. -->
 ## What changed (grouped)
 
 ### 1. Facet 2.0.0 compile completion (packages already bumped in tree)

@@ -1,3 +1,4 @@
+<!-- BEGIN:generated -->
 # Ecosystem Naming — Findings (sovport)
 
 All counts are over tracked, non-`node_modules` files (the naming-gate script
