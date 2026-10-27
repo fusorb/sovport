@@ -108,12 +108,13 @@ export const useAuthStore = create<sovportAuthState>((set, get) => ({
         refreshToken: parsed.refreshToken,
         sessionId: parsed.sessionId ?? null,
         isAuthenticated: true,
-        isLoading: false,
       });
       return true;
     } catch {
       await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY).catch(() => {});
       return false;
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));
