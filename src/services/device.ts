@@ -4,6 +4,7 @@
 
 import * as SecureStore from "expo-secure-store";
 import * as Crypto from "expo-crypto";
+import { Buffer } from "buffer";
 import { unlockWithBiometrics } from "./biometric";
 
 const DEVICE_PRIV_KEY = "sg_device_priv_key";

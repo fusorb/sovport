@@ -36,10 +36,11 @@ export default function PairScreen() {
       try {
         const kp = await ensureDeviceKeypair();
         if (kp.deviceId && kp.publicKey) {
+          const { Platform } = await import('react-native');
           await identity.registerPairedDevice?.({
             deviceId: kp.deviceId,
             publicKey: kp.publicKey,
-            platform: 'ios',
+            platform: Platform.OS,
           });
         }
       } catch {
