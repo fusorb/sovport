@@ -39,7 +39,7 @@ export default function ApproveScreen() {
       try {
         await signWithDeviceKey(challenge);
       } catch {}
-      await identity.approveDeviceApproval?.({ challenge } as any) ?? (identity as any).post?.(`/identity/device-approvals/${challenge}/approve`, {});
+      await identity.approveDeviceApproval({ challenge });
       setStatus('approved');
       setTimeout(() => router.replace('/'), 1500);
     } catch (e: any) {
