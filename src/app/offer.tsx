@@ -28,7 +28,7 @@ export default function OfferScreen() {
       return;
     }
     if (!isAuthenticated) {
-      router.replace(`/login?next=/offer?token=${encodeURIComponent(token)}`);
+      router.replace(`/pair`);
       return;
     }
     setLoading(true);

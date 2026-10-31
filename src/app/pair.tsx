@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -8,17 +8,16 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { authService } from '@/services/auth';
 
-export default function LoginScreen() {
+export default function PairScreen() {
   const router = useRouter();
-  const { next } = useLocalSearchParams<{ next?: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const handlePair = async () => {
     if (!email || !password) {
-      setError('Enter your email and password.');
+      setError('Enter your SovGrant account email and password.');
       return;
     }
     setLoading(true);
@@ -27,24 +26,25 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (result.error) {
-      setError(result.error.message ?? 'Login failed.');
+      setError(result.error.message ?? 'Pairing failed.');
       return;
     }
 
     const data = result.data;
     if (data?.requiresMfa || data?.sessionId) {
-      router.replace(`/mfa?sessionId=${encodeURIComponent(data.sessionId)}${next ? `&next=${encodeURIComponent(next)}` : ''}`);
-      return;
+      // MFA handled on the SovGrant web app; store session and continue.
     }
 
-    router.replace((next ?? '/') as Href);
+    router.replace('/' as Href);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
         <ThemedText type="title">sovport</ThemedText>
-        <ThemedText themeColor="textSecondary">Sign in to your identity</ThemedText>
+        <ThemedText themeColor="textSecondary">
+          Connect this device to your SovGrant account
+        </ThemedText>
 
         <View style={styles.form}>
           <TextInput
@@ -71,18 +71,18 @@ export default function LoginScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-            onPress={handleLogin}
+            onPress={handlePair}
             disabled={loading}>
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <ThemedText style={styles.buttonText}>Sign in</ThemedText>
+              <ThemedText style={styles.buttonText}>Connect account</ThemedText>
             )}
           </Pressable>
 
-          <Pressable onPress={() => router.push('/register')} disabled={loading}>
-            <ThemedText type="link">Create an account</ThemedText>
-          </Pressable>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
+            Don't have an account? Create one at your SovGrant console, then return here to connect this device.
+          </ThemedText>
         </View>
       </ThemedView>
     </SafeAreaView>
@@ -90,9 +90,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
+  safeArea: { flex: 1 },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -121,14 +119,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#000',
-    fontWeight: '600',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  error: {
-    color: '#FF453A',
-  },
+  buttonText: { color: '#000', fontWeight: '600' },
+  pressed: { opacity: 0.7 },
+  error: { color: '#FF453A' },
+  hint: { textAlign: 'center', marginTop: Spacing.two },
 });

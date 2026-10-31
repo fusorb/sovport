@@ -34,7 +34,7 @@ export default function DidScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace('/login');
+      router.replace('/pair');
       return;
     }
     check();

@@ -41,7 +41,7 @@ export default function WalletHomeScreen() {
 
   const handleLogout = async () => {
     await authService.logout();
-    router.replace('/login');
+    router.replace('/pair');
   };
 
   return (
@@ -50,7 +50,7 @@ export default function WalletHomeScreen() {
         <ThemedView style={styles.header}>
           <ThemedText type="title">sovport</ThemedText>
           <ThemedText themeColor="textSecondary">
-            {isAuthenticated && user ? `Signed in as ${user.name || user.email}` : 'Not signed in'}
+            {isAuthenticated && user ? `Connected: ${user.name || user.email}` : 'Not connected'}
           </ThemedText>
         </ThemedView>
 
@@ -79,7 +79,7 @@ export default function WalletHomeScreen() {
           <Pressable
             style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}
             onPress={handleLogout}>
-            <ThemedText style={styles.logoutText}>Sign out</ThemedText>
+            <ThemedText style={styles.logoutText}>Disconnect</ThemedText>
           </Pressable>
         )}
       </ScrollView>

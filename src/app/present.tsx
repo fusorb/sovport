@@ -31,7 +31,7 @@ export default function PresentScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace(`/login?next=/present?sessionId=${encodeURIComponent(sessionId)}&challenge=${encodeURIComponent(challenge)}`);
+      router.replace(`/pair`);
       return;
     }
     (async () => {
