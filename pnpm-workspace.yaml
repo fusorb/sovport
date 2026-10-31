@@ -1,0 +1,3 @@
+minimumReleaseAgeExclude:
+  - '@fusorb/facet-sdk@2.1.0'
+  - '@fusorb/facet-store@1.0.3'
