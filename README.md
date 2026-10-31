@@ -1,6 +1,6 @@
 # sovport
 
-Self-sovereign identity wallet for the ArcevoCirqle ecosystem. Built with Expo 57 + React Native 0.86, sovport will connect to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
+Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, sovport will connect to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
 
 > **Status (2026-08-05): blank Expo starter.** The SovGrant integration has not been built yet. This repo currently ships the default Expo tabs template (`index` / `explore`). The architecture below is the target; see [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and current facts.
 
