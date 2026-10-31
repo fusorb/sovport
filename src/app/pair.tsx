@@ -36,11 +36,7 @@ export default function PairScreen() {
       try {
         const kp = await ensureDeviceKeypair();
         if (kp.deviceId && kp.publicKey) {
-          await (identity as any).registerPairedDevice?.({
-            deviceId: kp.deviceId,
-            publicKey: kp.publicKey,
-            platform: 'ios',
-          }) ?? (identity as any).post?.('/identity/paired-devices', {
+          await identity.registerPairedDevice?.({
             deviceId: kp.deviceId,
             publicKey: kp.publicKey,
             platform: 'ios',
