@@ -7,6 +7,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { authService } from '@/services/auth';
+import { ensureDeviceKeypair } from '@/services/device';
+import { identity } from '@/sdk';
 
 export default function PairScreen() {
   const router = useRouter();
@@ -22,20 +24,37 @@ export default function PairScreen() {
     }
     setLoading(true);
     setError(null);
-    const result = await authService.login(email, password);
+    try {
+      const result = await authService.login(email, password);
+      if (result.error) {
+        setError(result.error.message ?? 'Pairing failed.');
+        setLoading(false);
+        return;
+      }
+
+      // Register this device as a trusted paired device
+      try {
+        const kp = await ensureDeviceKeypair();
+        if (kp.deviceId && kp.publicKey) {
+          await (identity as any).registerPairedDevice?.({
+            deviceId: kp.deviceId,
+            publicKey: kp.publicKey,
+            platform: 'ios',
+          }) ?? (identity as any).post?.('/identity/paired-devices', {
+            deviceId: kp.deviceId,
+            publicKey: kp.publicKey,
+            platform: 'ios',
+          });
+        }
+      } catch {
+        // Device registration is best-effort; pairing still succeeds
+      }
+
+      router.replace('/' as Href);
+    } catch (e: any) {
+      setError(e?.message ?? 'Pairing failed.');
+    }
     setLoading(false);
-
-    if (result.error) {
-      setError(result.error.message ?? 'Pairing failed.');
-      return;
-    }
-
-    const data = result.data;
-    if (data?.requiresMfa || data?.sessionId) {
-      // MFA handled on the SovGrant web app; store session and continue.
-    }
-
-    router.replace('/' as Href);
   };
 
   return (
