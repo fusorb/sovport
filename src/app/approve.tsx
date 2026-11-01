@@ -36,10 +36,11 @@ export default function ApproveScreen() {
         setStatus('ready');
         return;
       }
+      let signature: string | undefined;
       try {
-        await signWithDeviceKey(challenge);
+        signature = await signWithDeviceKey(challenge);
       } catch {}
-      await identity.approveDeviceApproval({ challenge });
+      await identity.approveDeviceApproval({ challenge, signature });
       setStatus('approved');
       setTimeout(() => router.replace('/'), 1500);
     } catch (e: any) {

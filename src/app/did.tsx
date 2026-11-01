@@ -95,7 +95,13 @@ export default function DidScreen() {
                 <ThemedText style={styles.buttonText}>Register my DID</ThemedText>
               )}
             </Pressable>
-            <Pressable onPress={handleContinue}>
+            <Pressable
+              onPress={() => {
+                try {
+                  localStorage.setItem('sovport-did-skip', '1');
+                } catch {}
+                router.replace('/');
+              }}>
               <ThemedText type="link">Skip for now</ThemedText>
             </Pressable>
           </>

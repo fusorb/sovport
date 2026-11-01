@@ -1,5 +1,8 @@
 import { auth, sgClient } from "@/sdk";
 import { useAuthStore } from "@/stores/auth-store";
+import * as SecureStore from "expo-secure-store";
+
+const TOKEN_STORAGE_KEY = "sovport-auth";
 
 /**
  * Auth service — thin wrapper over AuthSdk that keeps the Zustand auth
@@ -47,6 +50,9 @@ export const authService = {
     await auth.logout(sessionId ?? "").catch(() => {});
     sgClient.setAccessToken(null);
     useAuthStore.getState().clearAuth();
+    try {
+      await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
+    } catch {}
   },
 
   async refresh() {

@@ -35,7 +35,13 @@ export default function WalletHomeScreen() {
   useEffect(() => {
     if (!isAuthenticated) return;
     walletDidService.hasRegisteredDid().then((registered) => {
-      if (!registered) router.replace('/did');
+      if (!registered) {
+        try {
+          const skip = localStorage.getItem('sovport-did-skip');
+          if (skip === '1') return;
+        } catch {}
+        router.replace('/did');
+      }
     });
   }, [isAuthenticated, router]);
 

@@ -41,7 +41,7 @@ function PairingGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-      if (inPairing) router.replace('/');
+    if (inPairing && segments[0] !== 'approve') router.replace('/');
     setChecking(false);
   }, [isAuthenticated, isLoading, segments, router, unlocked]);
 
@@ -69,6 +69,8 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="pair" options={{ headerShown: false }} />
+          <Stack.Screen name="approve" options={{ headerShown: false }} />
+          <Stack.Screen name="mfa" options={{ headerShown: false }} />
           <Stack.Screen name="offer" options={{ title: 'Accept offer' }} />
           <Stack.Screen name="present" options={{ title: 'Present credential' }} />
           <Stack.Screen name="did" options={{ title: 'Wallet identity' }} />
