@@ -7,14 +7,16 @@ Source of truth for the ecosystem: the Fusorb architecture repo
 - Standards: `content/standards/` (repo structure, naming, UI invariant, agent protocol)
 - Decided facts: `ecosystem/ecosystem.json`
 
-Last synced: 2026-10-31, against fusorb `424e31c`.
+Last synced: 2026-11-05, against fusorb `634cef02`.
 
 ## Status: in sync
 
-- **Repo-structure baseline: done.** This repo now carries `AGENTS.md`,
-  `CLAUDE.md`, and `.github/workflows/ci.yml`.
+- **Repo-structure baseline: nearly complete.** This repo carries `AGENTS.md`,
+  the thin `CLAUDE.md`, `.github/workflows/ci.yml`, `.gitignore`, and (Windows
+  repo) `.gitattributes` with LF normalization. Still missing: a `decisions/`
+  ADR folder.
 - **Naming: in sync.** The `ArcWallet` -> `SovPort` and `ArcIdClient` ->
-  `SgClient` passes are complete.
+  `SgClient` passes are complete; re-verified against the `634cef02` ledger.
 
 ## Staying in sync
 

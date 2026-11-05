@@ -1,0 +1,5 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# .agent trackers must stay UTF-8 text (never let them silently go binary)
+.agent/*.md text eol=lf

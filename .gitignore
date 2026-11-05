@@ -45,6 +45,7 @@ sovport_codebase_snapshot.txt
 /ios
 /android
 
-# agent local state (not part of the product repo)
-.agent/
+# agent local state (not part of the product repo) — except the episodic canon, which is tracked
+.agent/*
+!.agent/episodes.md
 .commandcode/
