@@ -12,11 +12,11 @@ importers:
         specifier: ~57.0.26
         version: 57.0.26(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.2.18)(expo@57.0.31)(react-dom@19.2.3(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)
       '@fusorb/facet-sdk':
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.1.1
+        version: 2.1.1
       '@fusorb/facet-store':
-        specifier: 1.0.3
-        version: 1.0.3(@fusorb/facet-sdk@2.1.0)(@types/react@19.2.18)(react@19.2.3)
+        specifier: 1.0.4
+        version: 1.0.4(@fusorb/facet-sdk@2.1.1)(@types/react@19.2.18)(react@19.2.3)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -698,15 +698,15 @@ packages:
     resolution: {integrity: sha512-EbxYllZ7/ozONVZd425cm4XnolfW+AmSFT5aP7Jdno6oc3WrYQcHz2CO20z/2rwWwYgztmV2PXvYH+BQ8YFjqg==}
     hasBin: true
 
-  '@fusorb/facet-sdk@2.1.0':
-    resolution: {integrity: sha512-rz+6zRYnx2qwC21+m5ol8VCRP/QJd811RmxlHcCpdpvV1NWOXyBSvy5XXnryK0c1ADRNPCCizHOdYA/MBsmLoA==}
+  '@fusorb/facet-sdk@2.1.1':
+    resolution: {integrity: sha512-YpmKmjlAdw78CzW9Lbg5NSkrY2fZMdmHs//B/iwHgNmA6POt5NSi7dLvLWisYIkgEplMRJBSkOLq2t/HojyxIQ==}
     engines: {node: '>=20'}
 
-  '@fusorb/facet-store@1.0.3':
-    resolution: {integrity: sha512-VPcgnG4WiGlGIsp6iJ5owPSOE869n2dx4ohZ2XEfOIv0M3HrMyv5Wvis6/0Hl1psFQRKkAyM7fTnQw8CjXey+g==}
+  '@fusorb/facet-store@1.0.4':
+    resolution: {integrity: sha512-dOXrX9SSWGm4dThSMo3mMfjlTnY/QBcBf54ruD/imTxYc++oo/K01yeJp7HDoKfRu15IKHYaEGR4DDkdrGqrkg==}
     engines: {node: '>=22'}
     peerDependencies:
-      '@fusorb/facet-sdk': 2.1.0
+      '@fusorb/facet-sdk': ^2.1.1
 
   '@isaacs/ttlcache@1.4.1':
     resolution: {integrity: sha512-RQgQ4uQ+pLbqXfOmieB91ejmLwvSgv9nLx6sT6sD83s7umBypgg+OIBOBbEUiJXrfpnp9j0mRhYYdzp9uqq3lA==}
@@ -3875,11 +3875,11 @@ snapshots:
       chalk: 4.1.2
       js-yaml: 4.3.2
 
-  '@fusorb/facet-sdk@2.1.0': {}
+  '@fusorb/facet-sdk@2.1.1': {}
 
-  '@fusorb/facet-store@1.0.3(@fusorb/facet-sdk@2.1.0)(@types/react@19.2.18)(react@19.2.3)':
+  '@fusorb/facet-store@1.0.4(@fusorb/facet-sdk@2.1.1)(@types/react@19.2.18)(react@19.2.3)':
     dependencies:
-      '@fusorb/facet-sdk': 2.1.0
+      '@fusorb/facet-sdk': 2.1.1
       zustand: 5.0.16(@types/react@19.2.18)(react@19.2.3)
     transitivePeerDependencies:
       - '@types/react'

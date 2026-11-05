@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@expo/ui": "~57.0.26",
-    "@fusorb/facet-sdk": "2.1.0",
-    "@fusorb/facet-store": "1.0.3",
+    "@fusorb/facet-sdk": "2.1.1",
+    "@fusorb/facet-store": "1.0.4",
     "buffer": "^6.0.3",
     "expo": "^57.0.31",
     "expo-constants": "~57.0.22",
