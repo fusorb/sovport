@@ -2,7 +2,7 @@
 
 Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, sovport will connect to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
 
-> **Status (2026-10-31): integration in progress.** Auth, MFA, credential offer/accept, presentation, and wallet DID flows are scaffolded against `@fusorb/facet-sdk`; screens live under `src/app/`. See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
+> **Status (2026-11-05): integration in progress.** Auth, MFA, credential offer/accept, presentation, wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@2.1.1`; screens live under `src/app/`. See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`). No automated test suite yet — CI runs typecheck only.
 
 ## Vision
 
@@ -53,20 +53,27 @@ The wallet expects the SovGrant API at `http://localhost:4000/api/v1` by default
 | `pnpm android` | Start on Android emulator |
 | `pnpm ios` | Start on iOS simulator |
 | `pnpm web` | Start on web browser |
+| `pnpm typecheck` | TypeScript check (`tsc --noEmit`) |
+| `pnpm lint` | ESLint over `.ts`/`.tsx` |
+| `pnpm format` | Prettier write |
 | `pnpm snapshot` | Generate codebase snapshot for AI agents |
 
 ## Project Structure
 
 ```
 src/
-├── app/           # expo-router screens (file-based routing)
-│   └── (currently: index / explore tabs — SovGrant integration is next)
+├── app/           # expo-router screens (file-based routing):
+│                  #   index (dashboard), mfa, pair, approve, offer,
+│                  #   present, did, _layout
 ├── components/    # Reusable UI and wallet components
-├── services/      # SovGrant SDK clients and business logic   (planned)
-├── stores/        # Zustand state management               (planned)
+├── services/      # SovGrant SDK clients and business logic
+│                  #   (api-client, auth, biometric, credentials, device,
+│                  #    presentation, wallet-did)
+├── stores/        # Zustand state management (auth-store)
 ├── hooks/         # Custom React hooks
 ├── constants/     # Theme, spacing, configuration
-└── types/         # Shared TypeScript types                (planned)
+├── sdk/           # SG client wiring
+└── types/         # Shared TypeScript types
 ```
 
 ## Related
