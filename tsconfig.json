@@ -10,7 +10,9 @@
         "./assets/*"
       ]
     },
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "include": [
     "**/*.ts",

@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { authService } from '@/services/auth';
-import { ensureDeviceKeypair } from '@/services/device';
+import { getDeviceId, getDevicePublicJwk } from '@/services/device-identity';
 import { identity } from '@/sdk';
 
 export default function PairScreen() {
@@ -28,36 +28,45 @@ export default function PairScreen() {
       const result = await authService.login(email, password);
       if (result.error) {
         setError(result.error.message ?? 'Pairing failed.');
-        setLoading(false);
         return;
       }
 
-      // Register this device as a trusted paired device
+      // MFA-enabled accounts get a session, not tokens — continue on /mfa.
+      if (result.data?.requiresMfa) {
+        router.replace({
+          pathname: '/mfa',
+          params: { sessionId: result.data.sessionId, next: '/' },
+        } as Href);
+        return;
+      }
+
+      if (!result.data?.accessToken) {
+        setError('Sign-in did not return a session. Please try again.');
+        return;
+      }
+
+      // Register this device as a trusted paired device (best-effort:
+      // pairing still succeeds if the device can't be registered).
       try {
-        const kp = await ensureDeviceKeypair();
-        if (kp.deviceId && kp.publicKey) {
-          const { Platform } = await import('react-native');
-          await identity.registerPairedDevice?.({
-            deviceId: kp.deviceId,
-            publicKey: kp.publicKey,
-            platform: Platform.OS,
-          });
-        }
+        const [deviceId, jwk] = await Promise.all([getDeviceId(), getDevicePublicJwk()]);
+        const { Platform } = await import('react-native');
+        await identity.registerPairedDevice({ deviceId, publicKey: jwk.x, platform: Platform.OS });
       } catch {
-        // Device registration is best-effort; pairing still succeeds
+        // best-effort
       }
 
       router.replace('/' as Href);
     } catch (e: any) {
       setError(e?.message ?? 'Pairing failed.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
-        <ThemedText type="title">sovport</ThemedText>
+        <ThemedText type="title">SovPort</ThemedText>
         <ThemedText themeColor="textSecondary">
           Connect this device to your SovGrant account
         </ThemedText>

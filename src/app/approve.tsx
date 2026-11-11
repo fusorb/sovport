@@ -5,8 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { unlockWithBiometrics } from '@/services/biometric';
-import { signWithDeviceKey } from '@/services/device';
+import { signWithDeviceKey } from '@/services/device-identity';
 import { identity } from '@/sdk';
 
 export default function ApproveScreen() {
@@ -30,16 +29,16 @@ export default function ApproveScreen() {
     setStatus('approving');
     setError(null);
     try {
-      const unlocked = await unlockWithBiometrics('Approve sign-in with SovPort');
-      if (!unlocked) {
-        setError('Biometric authentication required');
+      // Signing is biometric-gated inside signWithDeviceKey.
+      let signature: string;
+      try {
+        signature = await signWithDeviceKey(challenge);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Could not sign the approval.');
         setStatus('ready');
         return;
       }
-      let signature: string | undefined;
-      try {
-        signature = await signWithDeviceKey(challenge);
-      } catch {}
+
       await identity.approveDeviceApproval({ challenge, signature });
       setStatus('approved');
       setTimeout(() => router.replace('/'), 1500);

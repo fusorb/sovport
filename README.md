@@ -1,8 +1,8 @@
-# sovport
+# SovPort
 
-Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, sovport will connect to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
+Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, SovPort connects to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
 
-> **Status (2026-11-05): integration in progress.** Auth, MFA, credential offer/accept, presentation, wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@2.1.1`; screens live under `src/app/`. See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`). No automated test suite yet — CI runs typecheck only.
+> **Status (2026-11-11): integration in progress.** Auth, MFA, credential offer/accept, presentation, wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@2.1.1`; screens live under `src/app/`. Accepted credentials are held on-device (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
 
 ## Vision
 
@@ -17,20 +17,24 @@ Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + Re
 
 ```
 ┌─────────────────┐     HTTP      ┌──────────────────────┐
-│   sovport     │ ──────────▶   │   SovGrant Backend      │
+│   SovPort       │ ──────────▶   │   SovGrant Backend      │
 │   (React Native)│ ◀──────────   │   (Fastify + Prisma)  │
 │   Expo 57       │   SDK/JSON    │   PostgreSQL + Redis  │
 └─────────────────┘               └──────────────────────┘
 ```
 
-sovport consumes **`@fusorb/facet-sdk`** — the published, framework-agnostic TypeScript fetch client that wraps the SovGrant API. It covers auth, credentials (VCs), DIDs, onboarding, passkeys, tenants, billing, webhooks, audit, and IdP. The SDK is pure fetch (no DOM / no React), so it runs in React Native unchanged; only the token-storage adapter is swapped for `expo-secure-store`.
+SovPort consumes **`@fusorb/facet-sdk`** — the published, framework-agnostic TypeScript fetch client that wraps the SovGrant API. It covers auth, credentials (VCs), DIDs, onboarding, passkeys, tenants, billing, webhooks, audit, and IdP. The SDK is pure fetch (no DOM / no React), so it runs in React Native unchanged; only the token-storage adapter is swapped for `expo-secure-store`.
 
-**Important:** `@fusorb/facet-components` / `@fusorb/facet-auth` / `@fusorb/facet-layout` are **web-only** (Radix + DOM + Tailwind). They do **not** run in React Native. sovport owns its native screens and uses the SDK for all server communication.
+**Important:** `@fusorb/facet-components` / `@fusorb/facet-auth` / `@fusorb/facet-layout` are **web-only** (Radix + DOM + Tailwind). They do **not** run in React Native. SovPort owns its native screens and uses the SDK for all server communication.
+
+### Crypto & custody
+
+All keys and signatures use **Ed25519** via `@noble/curves` (pure JS, no `crypto.subtle`) with randomness from `expo-crypto`, so the wallet works identically on iOS, Android, and web. A single device keypair backs both the paired-device registration and the wallet `did:key`. Presentation proofs are detached EdDSA JWS. Accepted credentials are stored on-device. Rationale: [ADR 0001](./decisions/0001-rn-safe-crypto-and-device-key.md), [ADR 0002](./decisions/0002-on-device-credential-custody.md).
 
 ## Prerequisites
 
 - Node.js >= 22
-- pnpm >= 9
+- pnpm 12 (`packageManager` pins `pnpm@12.6.0`)
 - [SovGrant](https://github.com/fusorb/sovgrant) backend running locally (or a shared dev instance)
 
 ## Getting Started
@@ -54,9 +58,10 @@ The wallet expects the SovGrant API at `http://localhost:4000/api/v1` by default
 | `pnpm ios` | Start on iOS simulator |
 | `pnpm web` | Start on web browser |
 | `pnpm typecheck` | TypeScript check (`tsc --noEmit`) |
-| `pnpm lint` | ESLint over `.ts`/`.tsx` |
-| `pnpm format` | Prettier write |
+| `pnpm test` | Unit tests (Node's built-in test runner) |
 | `pnpm snapshot` | Generate codebase snapshot for AI agents |
+
+> Lint/format tooling is intentionally not wired up yet — see the audit remediation ledger for the follow-up.
 
 ## Project Structure
 
@@ -67,12 +72,13 @@ src/
 │                  #   present, did, _layout
 ├── components/    # Reusable UI and wallet components
 ├── services/      # SovGrant SDK clients and business logic
-│                  #   (api-client, auth, biometric, credentials, device,
-│                  #    presentation, wallet-did)
+│                  #   (auth, biometric, credentials, credential-vault,
+│                  #    device-identity, presentation, wallet-did)
+├── lib/           # Pure, testable primitives (did-key, crypto, kv)
 ├── stores/        # Zustand state management (auth-store)
 ├── hooks/         # Custom React hooks
 ├── constants/     # Theme, spacing, configuration
-├── sdk/           # SG client wiring
+├── sdk/           # SovGrant client wiring
 └── types/         # Shared TypeScript types
 ```
 

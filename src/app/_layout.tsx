@@ -22,7 +22,8 @@ function PairingGate({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
     SplashScreenExpo.hideAsync();
 
-    const inPairing = segments[0] === 'pair' || segments[0] === 'approve';
+    const inPairing =
+      segments[0] === 'pair' || segments[0] === 'approve' || segments[0] === 'mfa';
 
     if (!isAuthenticated) {
       // Not paired yet -> send to pairing screen.
@@ -33,7 +34,7 @@ function PairingGate({ children }: { children: React.ReactNode }) {
 
     // Paired -> require biometric unlock before showing wallet.
     if (!unlocked) {
-      unlockWithBiometrics('Unlock sovport').then((ok) => {
+      unlockWithBiometrics('Unlock SovPort').then((ok) => {
         if (ok) setUnlocked(true);
         else router.replace('/pair');
         setChecking(false);

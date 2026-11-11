@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { kv } from '@/lib/kv';
 import { walletDidService } from '@/services/wallet-did';
 import { useAuthStore } from '@/stores/auth-store';
 
@@ -62,7 +63,7 @@ export default function DidScreen() {
       <ThemedView style={styles.container}>
         <ThemedText type="title">Your wallet identity</ThemedText>
         <ThemedText themeColor="textSecondary">
-          sovport uses a device-held key to sign verifiable presentations.
+          SovPort uses a device-held key to sign verifiable presentations.
           Register it with SovGrant so verifiers can resolve your identity — your
           private key never leaves this device.
         </ThemedText>
@@ -96,10 +97,8 @@ export default function DidScreen() {
               )}
             </Pressable>
             <Pressable
-              onPress={() => {
-                try {
-                  localStorage.setItem('sovport-did-skip', '1');
-                } catch {}
+              onPress={async () => {
+                await kv.set('sovport-did-skip', '1');
                 router.replace('/');
               }}>
               <ThemedText type="link">Skip for now</ThemedText>

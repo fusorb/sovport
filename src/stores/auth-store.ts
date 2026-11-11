@@ -28,7 +28,7 @@ interface PersistedSession {
  * adapts the zustand hook to `TokenStoreLike`, which feeds the sgClient 401
  * refresh / clear-auth bridge in `createZustandTokenStorage`.
  */
-export interface sovportAuthState extends Omit<AuthState, "setAuth"> {
+export interface SovportAuthState extends Omit<AuthState, "setAuth"> {
   sessionId: string | null;
   setAuth: (
     user: User,
@@ -42,7 +42,7 @@ export interface sovportAuthState extends Omit<AuthState, "setAuth"> {
   restore: () => Promise<boolean>;
 }
 
-export const useAuthStore = create<sovportAuthState>((set, get) => ({
+export const useAuthStore = create<SovportAuthState>((set, get) => ({
   user: null,
   accessToken: null,
   refreshToken: null,
@@ -86,11 +86,11 @@ export const useAuthStore = create<sovportAuthState>((set, get) => ({
 
   persist: async () => {
     const { user, accessToken, refreshToken, sessionId } = get();
-    if (!user || !accessToken || !refreshToken) return;
+    if (!user || !accessToken) return;
     const session: PersistedSession = {
       user,
       accessToken,
-      refreshToken,
+      refreshToken: refreshToken ?? "",
       sessionId: sessionId ?? undefined,
     };
     await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, JSON.stringify(session));

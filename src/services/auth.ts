@@ -1,4 +1,7 @@
 import { auth, sgClient } from "@/sdk";
+import { credentialVault } from "@/services/credential-vault";
+import { walletDidService } from "@/services/wallet-did";
+import { kv } from "@/lib/kv";
 import { useAuthStore } from "@/stores/auth-store";
 import * as SecureStore from "expo-secure-store";
 
@@ -53,6 +56,11 @@ export const authService = {
     try {
       await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
     } catch {}
+
+    // Drop local wallet state so a new account starts clean.
+    await credentialVault.clear().catch(() => {});
+    await walletDidService.clearRegistration().catch(() => {});
+    await kv.remove("sovport-did-skip").catch(() => {});
   },
 
   async refresh() {

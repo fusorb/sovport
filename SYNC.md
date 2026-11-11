@@ -7,14 +7,14 @@ Source of truth for the ecosystem: the Fusorb architecture repo
 - Standards: `content/standards/` (repo structure, naming, UI invariant, agent protocol)
 - Decided facts: `ecosystem/ecosystem.json`
 
-Last synced: 2026-11-05, against fusorb `634cef02`.
+Last synced: 2026-11-11, against fusorb `634cef02`.
 
 ## Status: in sync
 
-- **Repo-structure baseline: nearly complete.** This repo carries `AGENTS.md`,
-  the thin `CLAUDE.md`, `.github/workflows/ci.yml`, `.gitignore`, and (Windows
-  repo) `.gitattributes` with LF normalization. Still missing: a `decisions/`
-  ADR folder.
+- **Repo-structure baseline: complete.** This repo carries `AGENTS.md`, the thin
+  `CLAUDE.md`, `.github/workflows/ci.yml` (typecheck + unit tests),
+  `.gitignore`, `.gitattributes` (LF normalization for this Windows repo), and
+  the `decisions/` ADR folder.
 - **Naming: in sync.** The `ArcWallet` -> `SovPort` and `ArcIdClient` ->
   `SgClient` passes are complete; re-verified against the `634cef02` ledger.
 
@@ -22,3 +22,5 @@ Last synced: 2026-11-05, against fusorb `634cef02`.
 
 Re-read the naming ledger before any rename, and keep the baseline files above
 current. Never rename the live `arcevocirqle` brand, domain, or email addresses.
+
+See [docs/audits/](./docs/audits/) for the audit trail and open follow-ups.

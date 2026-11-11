@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sovport",
+    "name": "SovPort",
     "slug": "sovport",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,9 @@
     "scheme": "sovport",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fusorb.sovport"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.sovport"
+      "package": "com.fusorb.sovport"
     },
     "web": {
       "output": "static",
@@ -34,11 +36,16 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "SovPort uses Face ID to unlock your wallet and approve sign-in."
+        }
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     }
   }
 }

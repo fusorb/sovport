@@ -7,22 +7,28 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { credentialService } from '@/services/credentials';
-import { getDeviceDid, presentCredential } from '@/services/presentation';
+import { credentialVault } from '@/services/credential-vault';
+import { getDeviceDid } from '@/services/device-identity';
+import { presentCredential } from '@/services/presentation';
 import { useAuthStore } from '@/stores/auth-store';
-import type { Credential } from '@fusorb/facet-sdk';
+
+interface PresentableCredential {
+  id: string;
+  label: string;
+}
 
 /**
  * Presentation screen — reached via the deep link
- * `sovport://present?sessionId=…&challenge=…` (from ArcVerify's QR code
- * or deep link). The holder picks a credential, signs a detached JWS
- * proof with their on-device key, and SovGrant verifies it.
+ * `sovport://present?sessionId=…&challenge=…` (from the verifier's QR code).
+ * The holder picks a locally-held credential; the wallet signs a detached JWS
+ * proof with its on-device did:key and SovGrant verifies it.
  */
 export default function PresentScreen() {
   const router = useRouter();
   const { sessionId, challenge } = useLocalSearchParams<{ sessionId: string; challenge: string }>();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [credentials, setCredentials] = useState<Credential[] | null>(null);
-  const [selected, setSelected] = useState<Credential | null>(null);
+  const [items, setItems] = useState<PresentableCredential[] | null>(null);
+  const [selected, setSelected] = useState<PresentableCredential | null>(null);
   const [did, setDid] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [presenting, setPresenting] = useState(false);
@@ -31,19 +37,27 @@ export default function PresentScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace(`/pair`);
+      router.replace('/pair');
       return;
     }
     (async () => {
-      const [listRes, storedDid] = await Promise.all([
+      const [listRes, held, deviceDid] = await Promise.all([
         credentialService.list(),
+        credentialVault.list(),
         getDeviceDid(),
       ]);
+      // Only credentials held on this device can be presented.
+      const metaById = new Map((listRes.data ?? []).map((c) => [c.id, c]));
+      setItems(
+        held.map((h) => ({
+          id: h.credentialId,
+          label: metaById.get(h.credentialId)?.type ?? 'Verifiable credential',
+        })),
+      );
+      setDid(deviceDid);
       setLoading(false);
-      if (listRes.data) setCredentials(listRes.data);
-      if (storedDid) setDid(storedDid);
     })();
-  }, [isAuthenticated, router, sessionId, challenge]);
+  }, [isAuthenticated, router]);
 
   const handlePresent = async () => {
     if (!selected || !did || !sessionId || !challenge) {
@@ -52,12 +66,15 @@ export default function PresentScreen() {
     }
     setPresenting(true);
     setError(null);
-    const res = await presentCredential({
-      sessionId,
-      challenge,
-      credential: JSON.stringify(selected),
-      did,
-    });
+
+    const credential = await credentialVault.get(selected.id);
+    if (!credential) {
+      setPresenting(false);
+      setError('That credential is not stored on this device.');
+      return;
+    }
+
+    const res = await presentCredential({ sessionId, challenge, credential, did });
     setPresenting(false);
     if (res.data) {
       setResult({ valid: res.data.valid, reason: res.data.reason });
@@ -76,13 +93,13 @@ export default function PresentScreen() {
 
         {loading ? (
           <ActivityIndicator style={styles.spacer} />
-        ) : !credentials || credentials.length === 0 ? (
+        ) : !items || items.length === 0 ? (
           <ThemedText themeColor="textSecondary">
-            You have no credentials to present.
+            You have no credentials stored on this device to present.
           </ThemedText>
         ) : (
           <ThemedView style={styles.list}>
-            {credentials.map((c) => (
+            {items.map((c) => (
               <Pressable
                 key={c.id}
                 onPress={() => setSelected(c)}
@@ -90,10 +107,7 @@ export default function PresentScreen() {
                 <ThemedView
                   type={selected?.id === c.id ? 'backgroundSelected' : 'backgroundElement'}
                   style={styles.credentialInner}>
-                  <ThemedText type="default" style={styles.credentialTitle}>{c.type}</ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Issued {c.issuedAt ? new Date(c.issuedAt).toLocaleDateString() : '—'}
-                  </ThemedText>
+                  <ThemedText type="default" style={styles.credentialTitle}>{c.label}</ThemedText>
                 </ThemedView>
               </Pressable>
             ))}
@@ -116,7 +130,7 @@ export default function PresentScreen() {
             {presenting ? (
               <ActivityIndicator color="#000" />
             ) : (
-              <ThemedText style={styles.buttonText}>Present {selected.type}</ThemedText>
+              <ThemedText style={styles.buttonText}>Present {selected.label}</ThemedText>
             )}
           </Pressable>
         )}
