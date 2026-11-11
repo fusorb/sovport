@@ -60,21 +60,30 @@ follow-ups.
 - `src/components/animated-icon.module.css` did exist (the web variant was
   rebranded and simplified to a no-op overlay instead of the Expo starter demo).
 
+## Cross-repo fixes (second pass)
+
+- **sovgrant — device-approval signature verification: fixed.**
+  `approveDeviceApprovalFlow` now requires `deviceId` + `signature`, resolves that
+  device's registered `publicKey`, and verifies the Ed25519 signature over the
+  challenge (`verifyEd25519Signature` in `src/lib/crypto/crypto.ts`). The route
+  body schema requires both fields. This is a **breaking change** for the approve
+  endpoint — proof-of-possession is now mandatory. Covered by
+  `approve-device-approval.flow.test.ts` (6 cases, all passing).
+- **facet-sdk — `approveDeviceApproval` contract: fixed at source.**
+  The method now accepts and forwards `deviceId` (it previously dropped it).
+  Until a fixed SDK is published and the pin bumped, SovPort posts the approval
+  route directly (see the note in `src/app/approve.tsx`).
+
 ## Open follow-ups
 
-1. **sovgrant — verify the device-approval signature.** `approveDeviceApprovalFlow`
-   accepts `signature` but never verifies it (picks the most-recently-seen trusted
-   device). To enforce proof-of-possession it needs the requesting `deviceId`, an
-   Ed25519 verify of `signature` over `challenge` against that device's stored
-   `publicKey`, and `signature` made required. The wallet already sends a valid
-   signature, so only the server side remains.
+1. **facet-sdk — publish + re-pin.** Publish the SDK fix, bump SovPort's pin, and
+   revert `approve.tsx` to the typed `identity.approveDeviceApproval` call.
 2. **facet-sdk — widen return types.** `acceptOffer` is typed `void` but returns
    `{ credentialId, credential }`; `registerWalletDid` is typed `void` but returns
    the DID document. The wallet works around both with documented casts.
 3. **Tooling.** Add `eslint` + `eslint-config-expo` + `prettier` and wire a lint
-   step into CI. Deferred here because package installs could not complete in
-   this environment.
-4. **Tests.** Expand beyond crypto: SDK-adapters, vault, and screen behavior.
+   step into CI. Deferred: package installs could not complete in this environment.
+4. **Tests.** Expand beyond crypto/approval: SDK-adapters, vault, screen behavior.
 5. **EAS.** Add `extra.eas.projectId` once the project exists on EAS.
 6. **expo-crypto version.** `^58.0.7` sits oddly against the other ~57.x Expo
    modules; run `npx expo install --check` and align.

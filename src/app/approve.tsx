@@ -5,8 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { signWithDeviceKey } from '@/services/device-identity';
-import { identity } from '@/sdk';
+import { getDeviceId, signWithDeviceKey } from '@/services/device-identity';
+import { sgClient } from '@/sdk';
 
 export default function ApproveScreen() {
   const router = useRouter();
@@ -30,16 +30,24 @@ export default function ApproveScreen() {
     setError(null);
     try {
       // Signing is biometric-gated inside signWithDeviceKey.
+      let deviceId: string;
       let signature: string;
       try {
-        signature = await signWithDeviceKey(challenge);
+        [deviceId, signature] = await Promise.all([getDeviceId(), signWithDeviceKey(challenge)]);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Could not sign the approval.');
         setStatus('ready');
         return;
       }
 
-      await identity.approveDeviceApproval({ challenge, signature });
+      // @fusorb/facet-sdk@2.1.1 drops `deviceId` from approveDeviceApproval's
+      // request body, so POST the route directly. Revert to the SDK method once
+      // the fixed SDK is published.
+      await sgClient.post<{ success: boolean }>(
+        `/identity/device-approvals/${challenge}/approve`,
+        { deviceId, signature },
+      );
+
       setStatus('approved');
       setTimeout(() => router.replace('/'), 1500);
     } catch (e: any) {
