@@ -58,10 +58,11 @@ The wallet expects the SovGrant API at `http://localhost:4000/api/v1` by default
 | `pnpm ios` | Start on iOS simulator |
 | `pnpm web` | Start on web browser |
 | `pnpm typecheck` | TypeScript check (`tsc --noEmit`) |
+| `pnpm lint` | ESLint |
+| `pnpm format` | Prettier write |
+| `pnpm format:check` | Prettier check (used by CI) |
 | `pnpm test` | Unit tests (Node's built-in test runner) |
 | `pnpm snapshot` | Generate codebase snapshot for AI agents |
-
-> Lint/format tooling is intentionally not wired up yet — see the audit remediation ledger for the follow-up.
 
 ## Project Structure
 

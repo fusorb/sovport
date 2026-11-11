@@ -58,8 +58,13 @@ export default function MfaScreen() {
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.pressed]}
             onPress={handleVerify}
-            disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>Verify</ThemedText>}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <ThemedText style={styles.buttonText}>Verify</ThemedText>
+            )}
           </Pressable>
         </View>
       </ThemedView>

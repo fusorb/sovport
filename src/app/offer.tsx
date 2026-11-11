@@ -71,7 +71,8 @@ export default function OfferScreen() {
 
         <Pressable
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-          onPress={() => router.replace('/')}>
+          onPress={() => router.replace('/')}
+        >
           <ThemedText style={styles.buttonText}>Back to wallet</ThemedText>
         </Pressable>
       </ThemedView>

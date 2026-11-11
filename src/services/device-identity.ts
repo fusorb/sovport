@@ -7,9 +7,9 @@
 // The private key never leaves the device; only the public key is ever sent to
 // SovGrant. Key creation and signing are gated behind device biometrics.
 
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
-import { unlockWithBiometrics } from "./biometric";
+import { unlockWithBiometrics } from './biometric';
 import {
   didKeyFromEd25519,
   ed25519PublicJwk,
@@ -20,9 +20,9 @@ import {
   type Ed25519PublicJwk,
   toBase64Url,
   utf8ToBytes,
-} from "@/lib/crypto";
+} from '@/lib/crypto';
 
-const STORE_KEY = "sovport-device-key";
+const STORE_KEY = 'sovport-device-key';
 
 interface StoredDeviceIdentity {
   secretKey: string;
@@ -56,8 +56,8 @@ export async function getDeviceIdentity(): Promise<DeviceIdentity> {
     return cache;
   }
 
-  const unlocked = await unlockWithBiometrics("Create your SovPort device key");
-  if (!unlocked) throw new Error("Biometric authentication required to create the device key");
+  const unlocked = await unlockWithBiometrics('Create your SovPort device key');
+  if (!unlocked) throw new Error('Biometric authentication required to create the device key');
 
   const secretKey = await randomBytes(32);
   const publicKey = ed25519PublicKey(secretKey);
@@ -91,8 +91,8 @@ export async function getDeviceDid(): Promise<string> {
 
 /** Ed25519-sign a challenge (base64url signature), gated behind biometrics. */
 export async function signWithDeviceKey(challenge: string): Promise<string> {
-  const unlocked = await unlockWithBiometrics("Authenticate with your device key");
-  if (!unlocked) throw new Error("Biometric authentication required");
+  const unlocked = await unlockWithBiometrics('Authenticate with your device key');
+  if (!unlocked) throw new Error('Biometric authentication required');
 
   const { secretKey } = await getDeviceIdentity();
   return toBase64Url(ed25519Sign(utf8ToBytes(challenge), secretKey));

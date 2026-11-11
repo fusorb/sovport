@@ -9,14 +9,13 @@ import {
   type ApiError,
   type ApiResponse,
   type User,
-} from "@fusorb/facet-sdk";
-import { createZustandTokenStorage } from "@fusorb/facet-store";
-import { useAuthStore } from "@/stores/auth-store";
+} from '@fusorb/facet-sdk';
+import { createZustandTokenStorage } from '@fusorb/facet-store';
+import { useAuthStore } from '@/stores/auth-store';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-export const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
 
 // ── Client + refresh bridge (facet-store) ─────────────────────────────────────
 

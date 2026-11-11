@@ -22,8 +22,7 @@ function PairingGate({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
     SplashScreenExpo.hideAsync();
 
-    const inPairing =
-      segments[0] === 'pair' || segments[0] === 'approve' || segments[0] === 'mfa';
+    const inPairing = segments[0] === 'pair' || segments[0] === 'approve' || segments[0] === 'mfa';
 
     if (!isAuthenticated) {
       // Not paired yet -> send to pairing screen.

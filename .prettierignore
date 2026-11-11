@@ -1,0 +1,9 @@
+node_modules
+dist
+.expo
+android
+ios
+pnpm-lock.yaml
+.agent
+.agent-cache
+*.md

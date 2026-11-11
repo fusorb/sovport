@@ -13,15 +13,15 @@
 // The hash is taken over the EXACT credential string submitted — SovGrant
 // recomputes it over the request body's `credential` field.
 
-import { credentials, type ApiResponse } from "@/sdk";
-import { buildDetachedEdDsaJws, sha256Base64Url } from "@/lib/crypto";
-import { getDeviceIdentity } from "@/services/device-identity";
-import { useAuthStore } from "@/stores/auth-store";
+import { credentials, type ApiResponse } from '@/sdk';
+import { buildDetachedEdDsaJws, sha256Base64Url } from '@/lib/crypto';
+import { getDeviceIdentity } from '@/services/device-identity';
+import { useAuthStore } from '@/stores/auth-store';
 
 function unauthorized(): ApiResponse<never> {
   return {
     data: null,
-    error: { statusCode: 401, error: "Unauthorized", message: "Not signed in" },
+    error: { statusCode: 401, error: 'Unauthorized', message: 'Not signed in' },
   };
 }
 
@@ -35,7 +35,7 @@ export async function signPresentationProof(input: {
   const credentialHash = await sha256Base64Url(input.credential);
 
   return buildDetachedEdDsaJws({
-    header: { alg: "EdDSA", kid: `${input.did}#key-1`, nonce: input.challenge },
+    header: { alg: 'EdDSA', kid: `${input.did}#key-1`, nonce: input.challenge },
     payload: { credentialHash },
     secretKey,
   });

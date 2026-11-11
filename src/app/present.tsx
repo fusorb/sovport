@@ -103,11 +103,15 @@ export default function PresentScreen() {
               <Pressable
                 key={c.id}
                 onPress={() => setSelected(c)}
-                style={({ pressed }) => [styles.credentialOption, pressed && styles.pressed]}>
+                style={({ pressed }) => [styles.credentialOption, pressed && styles.pressed]}
+              >
                 <ThemedView
                   type={selected?.id === c.id ? 'backgroundSelected' : 'backgroundElement'}
-                  style={styles.credentialInner}>
-                  <ThemedText type="default" style={styles.credentialTitle}>{c.label}</ThemedText>
+                  style={styles.credentialInner}
+                >
+                  <ThemedText type="default" style={styles.credentialTitle}>
+                    {c.label}
+                  </ThemedText>
                 </ThemedView>
               </Pressable>
             ))}
@@ -126,7 +130,8 @@ export default function PresentScreen() {
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.pressed]}
             onPress={handlePresent}
-            disabled={presenting}>
+            disabled={presenting}
+          >
             {presenting ? (
               <ActivityIndicator color="#000" />
             ) : (

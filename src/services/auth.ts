@@ -1,11 +1,11 @@
-import { auth, sgClient } from "@/sdk";
-import { credentialVault } from "@/services/credential-vault";
-import { walletDidService } from "@/services/wallet-did";
-import { kv } from "@/lib/kv";
-import { useAuthStore } from "@/stores/auth-store";
-import * as SecureStore from "expo-secure-store";
+import { auth, sgClient } from '@/sdk';
+import { credentialVault } from '@/services/credential-vault';
+import { walletDidService } from '@/services/wallet-did';
+import { kv } from '@/lib/kv';
+import { useAuthStore } from '@/stores/auth-store';
+import * as SecureStore from 'expo-secure-store';
 
-const TOKEN_STORAGE_KEY = "sovport-auth";
+const TOKEN_STORAGE_KEY = 'sovport-auth';
 
 /**
  * Auth service — thin wrapper over AuthSdk that keeps the Zustand auth
@@ -17,7 +17,7 @@ export const authService = {
     const result = await auth.login(email, password);
     if (result.data?.accessToken) {
       const { identity, accessToken, refreshToken, sessionId } = result.data;
-      useAuthStore.getState().setAuth(identity, accessToken, refreshToken ?? "", sessionId);
+      useAuthStore.getState().setAuth(identity, accessToken, refreshToken ?? '', sessionId);
       sgClient.setAccessToken(accessToken);
       await useAuthStore.getState().persist();
     }
@@ -50,7 +50,7 @@ export const authService = {
 
   async logout() {
     const { sessionId } = useAuthStore.getState();
-    await auth.logout(sessionId ?? "").catch(() => {});
+    await auth.logout(sessionId ?? '').catch(() => {});
     sgClient.setAccessToken(null);
     useAuthStore.getState().clearAuth();
     try {
@@ -60,7 +60,7 @@ export const authService = {
     // Drop local wallet state so a new account starts clean.
     await credentialVault.clear().catch(() => {});
     await walletDidService.clearRegistration().catch(() => {});
-    await kv.remove("sovport-did-skip").catch(() => {});
+    await kv.remove('sovport-did-skip').catch(() => {});
   },
 
   async refresh() {

@@ -74,7 +74,8 @@ export default function WalletHomeScreen() {
         {didRegistered === false && (
           <Pressable
             style={({ pressed }) => [styles.setupBanner, pressed && styles.pressed]}
-            onPress={() => router.push('/did')}>
+            onPress={() => router.push('/did')}
+          >
             <ThemedText type="smallBold">Set up your wallet identity</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
               Register a device did:key so you can present credentials.
@@ -92,11 +93,20 @@ export default function WalletHomeScreen() {
             </ThemedText>
           ) : (
             rows.map(({ credential, held }) => (
-              <ThemedView key={credential.id} type="backgroundElement" style={styles.credentialCard}>
-                <ThemedText type="default" style={styles.credentialTitle}>{credential.type}</ThemedText>
+              <ThemedView
+                key={credential.id}
+                type="backgroundElement"
+                style={styles.credentialCard}
+              >
+                <ThemedText type="default" style={styles.credentialTitle}>
+                  {credential.type}
+                </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  Issued {credential.issuedAt ? new Date(credential.issuedAt).toLocaleDateString() : '—'}
-                  {credential.expiresAt ? ` · expires ${new Date(credential.expiresAt).toLocaleDateString()}` : ''}
+                  Issued{' '}
+                  {credential.issuedAt ? new Date(credential.issuedAt).toLocaleDateString() : '—'}
+                  {credential.expiresAt
+                    ? ` · expires ${new Date(credential.expiresAt).toLocaleDateString()}`
+                    : ''}
                   {held ? ' · stored on this device' : ' · not stored'}
                 </ThemedText>
               </ThemedView>
@@ -107,7 +117,8 @@ export default function WalletHomeScreen() {
         {isAuthenticated && (
           <Pressable
             style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}
-            onPress={handleLogout}>
+            onPress={handleLogout}
+          >
             <ThemedText style={styles.logoutText}>Disconnect</ThemedText>
           </Pressable>
         )}

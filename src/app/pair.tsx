@@ -97,7 +97,8 @@ export default function PairScreen() {
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.pressed]}
             onPress={handlePair}
-            disabled={loading}>
+            disabled={loading}
+          >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
@@ -106,7 +107,8 @@ export default function PairScreen() {
           </Pressable>
 
           <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
-            Don't have an account? Create one at your SovGrant console, then return here to connect this device.
+            Don&apos;t have an account? Create one at your SovGrant console, then return here to
+            connect this device.
           </ThemedText>
         </View>
       </ThemedView>

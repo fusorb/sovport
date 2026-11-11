@@ -4,9 +4,9 @@
 // string; the wallet stores it here and presents it straight from the device.
 // SovGrant never needs to hand it back later.
 
-import { kv } from "@/lib/kv";
+import { kv } from '@/lib/kv';
 
-const VAULT_KEY = "sovport-credential-vault";
+const VAULT_KEY = 'sovport-credential-vault';
 
 export interface HeldCredential {
   credentialId: string;

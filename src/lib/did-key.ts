@@ -4,21 +4,21 @@
 // polyfill), so the whole module is unit-testable in a plain Node/JS runtime.
 // Platform concerns (randomness, SHA-256) live in ./crypto.
 
-import { ed25519 } from "@noble/curves/ed25519.js";
-import { Buffer } from "buffer";
+import { ed25519 } from '@noble/curves/ed25519.js';
+import { Buffer } from 'buffer';
 
 // ── Encoding ──────────────────────────────────────────────────────────────────
 
 export function toBase64Url(bytes: Uint8Array): string {
-  return Buffer.from(bytes).toString("base64url");
+  return Buffer.from(bytes).toString('base64url');
 }
 
 export function fromBase64Url(value: string): Uint8Array {
-  return new Uint8Array(Buffer.from(value, "base64url"));
+  return new Uint8Array(Buffer.from(value, 'base64url'));
 }
 
 export function utf8ToBytes(value: string): Uint8Array {
-  return new Uint8Array(Buffer.from(value, "utf8"));
+  return new Uint8Array(Buffer.from(value, 'utf8'));
 }
 
 // ── Ed25519 ───────────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ export function ed25519Verify(
 
 // ── did:key (Ed25519, multicodec + multibase base58btc) ───────────────────────
 
-const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
 /** Ed25519-public multicodec prefix, unsigned-varint encoded: [0xed, 0x01]. */
 const ED25519_MULTICODEC_PREFIX = new Uint8Array([0xed, 0x01]);
@@ -53,7 +53,7 @@ export function base58btcEncode(bytes: Uint8Array): string {
   while (leadingZeros < bytes.length && bytes[leadingZeros] === 0) leadingZeros++;
 
   const body = bytes.slice(leadingZeros);
-  if (body.length === 0) return "1".repeat(leadingZeros);
+  if (body.length === 0) return '1'.repeat(leadingZeros);
 
   const digits: number[] = [0];
   for (const byte of body) {
@@ -69,9 +69,9 @@ export function base58btcEncode(bytes: Uint8Array): string {
     }
   }
 
-  const out: string[] = new Array(leadingZeros).fill("1");
+  const out: string[] = new Array(leadingZeros).fill('1');
   for (let i = digits.length - 1; i >= 0; i--) out.push(BASE58_ALPHABET[digits[i]]);
-  return out.join("");
+  return out.join('');
 }
 
 /**
@@ -87,14 +87,14 @@ export function didKeyFromEd25519(publicKey: Uint8Array): string {
 }
 
 export type Ed25519PublicJwk = {
-  kty: "OKP";
-  crv: "Ed25519";
+  kty: 'OKP';
+  crv: 'Ed25519';
   x: string;
 };
 
 /** The public JWK shape SovGrant's registerWalletDid accepts. */
 export function ed25519PublicJwk(publicKey: Uint8Array): Ed25519PublicJwk {
-  return { kty: "OKP", crv: "Ed25519", x: toBase64Url(publicKey) };
+  return { kty: 'OKP', crv: 'Ed25519', x: toBase64Url(publicKey) };
 }
 
 // ── Detached JWS (EdDSA) ──────────────────────────────────────────────────────

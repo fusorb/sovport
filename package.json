@@ -10,6 +10,9 @@
     "web": "expo start --web",
     "snapshot": "node gen-snapshot.js",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
@@ -43,6 +46,9 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "@types/react": "~19.2.18",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^58.0.4",
+    "prettier": "^3.9.10",
     "typescript": "~6.0.3"
   },
   "private": true

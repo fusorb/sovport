@@ -81,8 +81,12 @@ follow-ups.
 2. **facet-sdk — widen return types.** `acceptOffer` is typed `void` but returns
    `{ credentialId, credential }`; `registerWalletDid` is typed `void` but returns
    the DID document. The wallet works around both with documented casts.
-3. **Tooling.** Add `eslint` + `eslint-config-expo` + `prettier` and wire a lint
-   step into CI. Deferred: package installs could not complete in this environment.
+3. ~~**Tooling.** Add `eslint` + `eslint-config-expo` + `prettier` and wire a lint
+   step into CI.~~ **Done.** `eslint` 9 (+ `eslint-config-expo`) and `prettier` are
+   installed and wired: `pnpm lint`, `pnpm format`, `pnpm format:check`. CI runs
+   typecheck, lint, format check, and tests. Prettier is scoped to code — markdown
+   is ignored — and the source tree is now formatted. (eslint 10 is incompatible
+   with eslint-config-expo 58's react plugin, so eslint is pinned to 9.)
 4. **Tests.** Expand beyond crypto/approval: SDK-adapters, vault, screen behavior.
 5. **EAS.** Add `extra.eas.projectId` once the project exists on EAS.
 6. **expo-crypto version.** `^58.0.7` sits oddly against the other ~57.x Expo

@@ -3,9 +3,9 @@
 // a SovGrant account. SovPort never stores the user's password; the paired
 // device token is unlocked behind biometrics.
 
-import * as LocalAuthentication from "expo-local-authentication";
+import * as LocalAuthentication from 'expo-local-authentication';
 
-export type BiometricKind = "fingerprint" | "face" | "iris" | "none";
+export type BiometricKind = 'fingerprint' | 'face' | 'iris' | 'none';
 
 export async function biometricAvailable(): Promise<boolean> {
   const hasHardware = await LocalAuthentication.hasHardwareAsync();
@@ -16,23 +16,23 @@ export async function biometricAvailable(): Promise<boolean> {
 export async function biometricKind(): Promise<BiometricKind> {
   const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
   if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-    return "face";
+    return 'face';
   }
   if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-    return "fingerprint";
+    return 'fingerprint';
   }
   if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
-    return "iris";
+    return 'iris';
   }
-  return "none";
+  return 'none';
 }
 
-export async function unlockWithBiometrics(promptMessage = "Unlock sovport"): Promise<boolean> {
+export async function unlockWithBiometrics(promptMessage = 'Unlock sovport'): Promise<boolean> {
   const available = await biometricAvailable();
   if (!available) return true; // no biometrics enrolled -> allow (dev/fallback)
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage,
-    cancelLabel: "Cancel",
+    cancelLabel: 'Cancel',
     disableDeviceFallback: false,
   });
   return result.success;

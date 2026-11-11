@@ -1,10 +1,10 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
-import { identity } from "@/sdk";
-import { getDeviceDid, getDeviceId, getDevicePublicJwk } from "@/services/device-identity";
-import { useAuthStore } from "@/stores/auth-store";
+import { identity } from '@/sdk';
+import { getDeviceDid, getDeviceId, getDevicePublicJwk } from '@/services/device-identity';
+import { useAuthStore } from '@/stores/auth-store';
 
-const REGISTRATION_KEY = "sovport-did-registration";
+const REGISTRATION_KEY = 'sovport-did-registration';
 
 interface DidRegistration {
   providerWalletId: string;
@@ -47,7 +47,7 @@ export const walletDidService = {
    */
   async register(): Promise<string> {
     if (!useAuthStore.getState().accessToken) {
-      throw new Error("Not signed in — cannot register wallet DID");
+      throw new Error('Not signed in — cannot register wallet DID');
     }
 
     const [publicKeyJwk, did, providerWalletId] = await Promise.all([
@@ -58,12 +58,12 @@ export const walletDidService = {
 
     const result = await identity.registerWalletDid({
       publicKeyJwk,
-      provider: "sovport",
+      provider: 'sovport',
       providerWalletId,
     });
 
     if (result.error) {
-      throw new Error(result.error.message ?? "Failed to register wallet DID");
+      throw new Error(result.error.message ?? 'Failed to register wallet DID');
     }
 
     const registration: DidRegistration = { providerWalletId, did };

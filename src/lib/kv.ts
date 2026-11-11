@@ -4,7 +4,7 @@
 // vault, first-run flags) lives here. Backed by AsyncStorage, which works on
 // iOS, Android, and web (localStorage).
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const kv = {
   get(key: string): Promise<string | null> {

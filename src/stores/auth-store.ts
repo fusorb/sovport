@@ -1,11 +1,11 @@
-import type { User } from "@fusorb/facet-sdk";
-import type { AuthState } from "@fusorb/facet-store";
-import * as SecureStore from "expo-secure-store";
-import { create } from "zustand";
+import type { User } from '@fusorb/facet-sdk';
+import type { AuthState } from '@fusorb/facet-store';
+import * as SecureStore from 'expo-secure-store';
+import { create } from 'zustand';
 
 export { type User };
 
-export const TOKEN_STORAGE_KEY = "sovport-auth";
+export const TOKEN_STORAGE_KEY = 'sovport-auth';
 
 interface PersistedSession {
   user: User;
@@ -28,14 +28,9 @@ interface PersistedSession {
  * adapts the zustand hook to `TokenStoreLike`, which feeds the sgClient 401
  * refresh / clear-auth bridge in `createZustandTokenStorage`.
  */
-export interface SovportAuthState extends Omit<AuthState, "setAuth"> {
+export interface SovportAuthState extends Omit<AuthState, 'setAuth'> {
   sessionId: string | null;
-  setAuth: (
-    user: User,
-    accessToken: string,
-    refreshToken: string,
-    sessionId?: string,
-  ) => void;
+  setAuth: (user: User, accessToken: string, refreshToken: string, sessionId?: string) => void;
   /** Persist the current session to the secure store. */
   persist: () => Promise<void>;
   /** Restore a persisted session on launch. Returns true if one was found. */
@@ -90,7 +85,7 @@ export const useAuthStore = create<SovportAuthState>((set, get) => ({
     const session: PersistedSession = {
       user,
       accessToken,
-      refreshToken: refreshToken ?? "",
+      refreshToken: refreshToken ?? '',
       sessionId: sessionId ?? undefined,
     };
     await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, JSON.stringify(session));

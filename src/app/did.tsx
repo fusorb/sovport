@@ -63,9 +63,8 @@ export default function DidScreen() {
       <ThemedView style={styles.container}>
         <ThemedText type="title">Your wallet identity</ThemedText>
         <ThemedText themeColor="textSecondary">
-          SovPort uses a device-held key to sign verifiable presentations.
-          Register it with SovGrant so verifiers can resolve your identity — your
-          private key never leaves this device.
+          SovPort uses a device-held key to sign verifiable presentations. Register it with SovGrant
+          so verifiers can resolve your identity — your private key never leaves this device.
         </ThemedText>
 
         {loading ? (
@@ -73,13 +72,18 @@ export default function DidScreen() {
         ) : did ? (
           <>
             <ThemedView type="backgroundElement" style={styles.didBox}>
-              <ThemedText type="small" themeColor="textSecondary">did:key</ThemedText>
-              <ThemedText type="code" style={styles.didText}>{did}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                did:key
+              </ThemedText>
+              <ThemedText type="code" style={styles.didText}>
+                {did}
+              </ThemedText>
             </ThemedView>
             <ThemedText style={styles.success}>✓ Registered</ThemedText>
             <Pressable
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-              onPress={handleContinue}>
+              onPress={handleContinue}
+            >
               <ThemedText style={styles.buttonText}>Continue to wallet</ThemedText>
             </Pressable>
           </>
@@ -89,7 +93,8 @@ export default function DidScreen() {
             <Pressable
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
               onPress={handleRegister}
-              disabled={loading}>
+              disabled={loading}
+            >
               {loading ? (
                 <ActivityIndicator color="#000" />
               ) : (
@@ -100,7 +105,8 @@ export default function DidScreen() {
               onPress={async () => {
                 await kv.set('sovport-did-skip', '1');
                 router.replace('/');
-              }}>
+              }}
+            >
               <ThemedText type="link">Skip for now</ThemedText>
             </Pressable>
           </>

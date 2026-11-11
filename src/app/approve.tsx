@@ -12,7 +12,9 @@ export default function ApproveScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ challenge?: string }>();
   const challenge = params.challenge;
-  const [status, setStatus] = useState<'loading' | 'ready' | 'approving' | 'approved' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'approving' | 'approved' | 'error'>(
+    'loading',
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,10 +45,10 @@ export default function ApproveScreen() {
       // @fusorb/facet-sdk@2.1.1 drops `deviceId` from approveDeviceApproval's
       // request body, so POST the route directly. Revert to the SDK method once
       // the fixed SDK is published.
-      await sgClient.post<{ success: boolean }>(
-        `/identity/device-approvals/${challenge}/approve`,
-        { deviceId, signature },
-      );
+      await sgClient.post<{ success: boolean }>(`/identity/device-approvals/${challenge}/approve`, {
+        deviceId,
+        signature,
+      });
 
       setStatus('approved');
       setTimeout(() => router.replace('/'), 1500);
@@ -85,13 +87,30 @@ export default function ApproveScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.two, padding: Spacing.four },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+    padding: Spacing.four,
+  },
   subtitle: { textAlign: 'center' },
   loader: { marginTop: Spacing.four },
   actions: { width: '100%', gap: Spacing.two, marginTop: Spacing.four },
-  approveBtn: { backgroundColor: '#4AD3F5', borderRadius: Spacing.two, paddingVertical: Spacing.three, alignItems: 'center' },
+  approveBtn: {
+    backgroundColor: '#4AD3F5',
+    borderRadius: Spacing.two,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
   approveText: { color: '#000', fontWeight: '600' },
-  rejectBtn: { borderWidth: 1, borderColor: '#3A3A3C', borderRadius: Spacing.two, paddingVertical: Spacing.three, alignItems: 'center' },
+  rejectBtn: {
+    borderWidth: 1,
+    borderColor: '#3A3A3C',
+    borderRadius: Spacing.two,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
   rejectText: { fontWeight: '600' },
   success: { color: '#32D74B', marginTop: Spacing.four, fontWeight: '600' },
   error: { color: '#FF453A', marginTop: Spacing.two },
