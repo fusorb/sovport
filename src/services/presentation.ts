@@ -14,7 +14,7 @@
 // recomputes it over the request body's `credential` field.
 
 import { credentials, type ApiResponse } from '@/sdk';
-import { buildDetachedEdDsaJws, sha256Base64Url } from '@/lib/crypto';
+import { buildPresentationJws, sha256Base64Url } from '@/lib/crypto';
 import { getDeviceIdentity } from '@/services/device-identity';
 import { useAuthStore } from '@/stores/auth-store';
 
@@ -34,9 +34,10 @@ export async function signPresentationProof(input: {
   const { secretKey } = await getDeviceIdentity();
   const credentialHash = await sha256Base64Url(input.credential);
 
-  return buildDetachedEdDsaJws({
-    header: { alg: 'EdDSA', kid: `${input.did}#key-1`, nonce: input.challenge },
-    payload: { credentialHash },
+  return buildPresentationJws({
+    did: input.did,
+    challenge: input.challenge,
+    credentialHash,
     secretKey,
   });
 }

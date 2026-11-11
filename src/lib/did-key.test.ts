@@ -5,6 +5,7 @@ import { describe, it } from 'node:test';
 
 import {
   buildDetachedEdDsaJws,
+  buildPresentationJws,
   didKeyFromEd25519,
   ed25519PublicKey,
   ed25519Sign,
@@ -66,6 +67,56 @@ describe('detached JWS', () => {
     assert.equal(
       ed25519Verify(fromBase64Url(signaturePart), signingInput, hexToBytes(PUBLIC)),
       true,
+    );
+  });
+});
+
+describe('presentation proof JWS', () => {
+  const DID = didKeyFromEd25519(hexToBytes(PUBLIC));
+
+  it('binds the did:key, challenge and credential hash, and verifies', () => {
+    const challenge = 'session-challenge-123';
+    const credentialHash = 'aGVsbG8';
+
+    const jws = buildPresentationJws({
+      did: DID,
+      challenge,
+      credentialHash,
+      secretKey: hexToBytes(SECRET),
+    });
+    const [headerPart, payloadPart, signaturePart] = jws.split('.');
+
+    assert.equal(payloadPart, '');
+
+    // Header must carry the exact contract SovGrant reconstructs.
+    assert.deepEqual(JSON.parse(new TextDecoder().decode(fromBase64Url(headerPart))), {
+      alg: 'EdDSA',
+      kid: `${DID}#key-1`,
+      nonce: challenge,
+    });
+
+    const payloadPart64 = toBase64Url(utf8ToBytes(JSON.stringify({ credentialHash })));
+    const signingInput = utf8ToBytes(`${headerPart}.${payloadPart64}`);
+    assert.equal(
+      ed25519Verify(fromBase64Url(signaturePart), signingInput, hexToBytes(PUBLIC)),
+      true,
+    );
+  });
+
+  it('does not verify against a different credential hash', () => {
+    const jws = buildPresentationJws({
+      did: DID,
+      challenge: 'c',
+      credentialHash: 'hash-a',
+      secretKey: hexToBytes(SECRET),
+    });
+    const [headerPart, , signaturePart] = jws.split('.');
+
+    const wrongPayload = toBase64Url(utf8ToBytes(JSON.stringify({ credentialHash: 'hash-b' })));
+    const signingInput = utf8ToBytes(`${headerPart}.${wrongPayload}`);
+    assert.equal(
+      ed25519Verify(fromBase64Url(signaturePart), signingInput, hexToBytes(PUBLIC)),
+      false,
     );
   });
 });

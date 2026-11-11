@@ -20,8 +20,8 @@ function PairingGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoading) return;
-    SplashScreenExpo.hideAsync();
 
+    // The native splash is hidden by AnimatedSplashOverlay (single owner).
     const inPairing = segments[0] === 'pair' || segments[0] === 'approve' || segments[0] === 'mfa';
 
     if (!isAuthenticated) {

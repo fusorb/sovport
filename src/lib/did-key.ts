@@ -115,3 +115,29 @@ export function buildDetachedEdDsaJws(input: {
   const signature = ed25519Sign(signingInput, input.secretKey);
   return `${headerB64}..${toBase64Url(signature)}`;
 }
+
+// ── Presentation proof (SovGrant verification contract) ───────────────────────
+
+/**
+ * Build the detached JWS SovGrant verifies for a credential presentation
+ * (`verify-present.route.ts` + `lib/security/jws-proof.ts`):
+ *
+ *   header:  { alg: "EdDSA", kid: "<did:key>#key-1", nonce: "<challenge>" }
+ *   payload: { credentialHash: "<base64url(sha256(credential))>" }
+ *
+ * `credentialHash` is computed by the caller over the exact credential string
+ * that will be submitted — hashing is deliberately kept out of here so the
+ * whole proof shape is unit-testable.
+ */
+export function buildPresentationJws(input: {
+  did: string;
+  challenge: string;
+  credentialHash: string;
+  secretKey: Uint8Array;
+}): string {
+  return buildDetachedEdDsaJws({
+    header: { alg: 'EdDSA', kid: `${input.did}#key-1`, nonce: input.challenge },
+    payload: { credentialHash: input.credentialHash },
+    secretKey: input.secretKey,
+  });
+}
