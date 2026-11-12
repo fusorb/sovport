@@ -4,16 +4,11 @@ import { credentials, type ApiResponse } from '@/sdk';
 import { credentialVault } from '@/services/credential-vault';
 import { useAuthStore } from '@/stores/auth-store';
 
-/**
- * What POST /credentials/offers/:token/accept actually returns. The SDK types
- * acceptOffer as ApiResponse<void>, but SovGrant returns the issued credential
- * (see sovgrant createAcceptFlow). We read the real payload so the wallet can
- * store the VC locally.
- */
-interface AcceptOfferResult {
+/** The issued credential returned by POST /credentials/offers/:token/accept. */
+type AcceptOfferResult = {
   credentialId: string;
   credential: string | Record<string, unknown>;
-}
+};
 
 function unauthorized(): ApiResponse<never> {
   return {
@@ -36,9 +31,7 @@ export const credentialService = {
   async acceptOffer(token: string): Promise<ApiResponse<AcceptOfferResult>> {
     if (!useAuthStore.getState().accessToken) return unauthorized();
 
-    const result = (await credentials.acceptOffer(
-      token,
-    )) as unknown as ApiResponse<AcceptOfferResult>;
+    const result = await credentials.acceptOffer(token);
 
     if (result.data?.credential) {
       const credential =

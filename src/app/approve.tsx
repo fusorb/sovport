@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { getDeviceId, signWithDeviceKey } from '@/services/device-identity';
-import { sgClient } from '@/sdk';
+import { identity } from '@/sdk';
 
 export default function ApproveScreen() {
   const router = useRouter();
@@ -42,13 +42,12 @@ export default function ApproveScreen() {
         return;
       }
 
-      // @fusorb/facet-sdk@2.1.1 drops `deviceId` from approveDeviceApproval's
-      // request body, so POST the route directly. Revert to the SDK method once
-      // the fixed SDK is published.
-      await sgClient.post<{ success: boolean }>(`/identity/device-approvals/${challenge}/approve`, {
-        deviceId,
-        signature,
-      });
+      const result = await identity.approveDeviceApproval({ challenge, deviceId, signature });
+      if (result.error) {
+        setError(result.error.message ?? 'Approval failed');
+        setStatus('ready');
+        return;
+      }
 
       setStatus('approved');
       setTimeout(() => router.replace('/'), 1500);
