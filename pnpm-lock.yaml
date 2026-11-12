@@ -167,11 +167,11 @@ importers:
   .:
     dependencies:
       '@fusorb/facet-sdk':
-        specifier: 2.1.1
-        version: 2.1.1
+        specifier: 3.0.0
+        version: 3.0.0
       '@fusorb/facet-store':
-        specifier: 1.0.4
-        version: 1.0.4(@fusorb/facet-sdk@2.1.1)(@types/react@19.2.18)(react@19.2.3)
+        specifier: 1.0.5
+        version: 1.0.5(@fusorb/facet-sdk@3.0.0)(@types/react@19.2.18)(react@19.2.3)
       '@noble/curves':
         specifier: ^2.4.0
         version: 2.4.0
@@ -894,15 +894,15 @@ packages:
     resolution: {integrity: sha512-EbxYllZ7/ozONVZd425cm4XnolfW+AmSFT5aP7Jdno6oc3WrYQcHz2CO20z/2rwWwYgztmV2PXvYH+BQ8YFjqg==}
     hasBin: true
 
-  '@fusorb/facet-sdk@2.1.1':
-    resolution: {integrity: sha512-YpmKmjlAdw78CzW9Lbg5NSkrY2fZMdmHs//B/iwHgNmA6POt5NSi7dLvLWisYIkgEplMRJBSkOLq2t/HojyxIQ==}
+  '@fusorb/facet-sdk@3.0.0':
+    resolution: {integrity: sha512-P9SKaTwg/sbQN9+vwnMn0aZkT8tPE0CJ0ovqFrjKyuFumZYIhKG6c228lQHHGo4BLHFvsyj2zk6Cu/t/mRBfbw==}
     engines: {node: '>=20'}
 
-  '@fusorb/facet-store@1.0.4':
-    resolution: {integrity: sha512-dOXrX9SSWGm4dThSMo3mMfjlTnY/QBcBf54ruD/imTxYc++oo/K01yeJp7HDoKfRu15IKHYaEGR4DDkdrGqrkg==}
+  '@fusorb/facet-store@1.0.5':
+    resolution: {integrity: sha512-Q8pC9//M7OTBDdQAmxIerTYa0dZxk4MdtKiBMnOaeOy1hXphQ9JD1l1bR5jY9yAP18PbnoR/G/u3lwca9KbTBA==}
     engines: {node: '>=22'}
     peerDependencies:
-      '@fusorb/facet-sdk': ^2.1.1
+      '@fusorb/facet-sdk': ^3.0.0
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -5002,11 +5002,11 @@ snapshots:
       chalk: 4.1.2
       js-yaml: 4.3.2
 
-  '@fusorb/facet-sdk@2.1.1': {}
+  '@fusorb/facet-sdk@3.0.0': {}
 
-  '@fusorb/facet-store@1.0.4(@fusorb/facet-sdk@2.1.1)(@types/react@19.2.18)(react@19.2.3)':
+  '@fusorb/facet-store@1.0.5(@fusorb/facet-sdk@3.0.0)(@types/react@19.2.18)(react@19.2.3)':
     dependencies:
-      '@fusorb/facet-sdk': 2.1.1
+      '@fusorb/facet-sdk': 3.0.0
       zustand: 5.0.16(@types/react@19.2.18)(react@19.2.3)
     transitivePeerDependencies:
       - '@types/react'
