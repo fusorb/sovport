@@ -1,7 +1,13 @@
-// SovPort — device biometric unlock (expo-local-authentication).
-// Used to gate access to the wallet after the device has been paired with
-// a SovGrant account. SovPort never stores the user's password; the paired
-// device token is unlocked behind biometrics.
+// SovPort — device authentication gate (expo-local-authentication).
+//
+// Gated operations: wallet unlock after pairing, device-key creation, and
+// challenge signing. SovPort never stores the user's password; the paired
+// device token is unlocked behind device authentication.
+//
+// Threat model: an attacker holding an unlocked phone. If the device has any
+// lock (biometrics or passcode), a sensitive operation must satisfy it first.
+// A device with no lock at all has no secret to check against — that case is
+// left permissive and can only be changed by enrolling a device lock.
 
 import * as LocalAuthentication from 'expo-local-authentication';
 
@@ -27,9 +33,19 @@ export async function biometricKind(): Promise<BiometricKind> {
   return 'none';
 }
 
+/**
+ * Require the device owner to authenticate before a sensitive operation.
+ *
+ * Uses the enrolled *security level*, not `isEnrolledAsync` (which reports only
+ * biometrics): a passcode-only device previously slipped through and was allowed
+ * with no prompt. `disableDeviceFallback: false` accepts the device passcode, so
+ * every locked device is challenged. Only a device with no lock at all — nothing
+ * to authenticate against — passes without a prompt.
+ */
 export async function unlockWithBiometrics(promptMessage = 'Unlock sovport'): Promise<boolean> {
-  const available = await biometricAvailable();
-  if (!available) return true; // no biometrics enrolled -> allow (dev/fallback)
+  const level = await LocalAuthentication.getEnrolledLevelAsync();
+  if (level === LocalAuthentication.SecurityLevel.NONE) return true;
+
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage,
     cancelLabel: 'Cancel',
