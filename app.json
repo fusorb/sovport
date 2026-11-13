@@ -42,6 +42,14 @@
         {
           "faceIDPermission": "SovPort uses Face ID to unlock your wallet and approve sign-in."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "SovPort uses the camera to scan presentation QR codes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "experiments": {
