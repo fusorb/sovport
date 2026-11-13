@@ -21,6 +21,10 @@ export function utf8ToBytes(value: string): Uint8Array {
   return new Uint8Array(Buffer.from(value, 'utf8'));
 }
 
+export function utf8FromBytes(bytes: Uint8Array): string {
+  return Buffer.from(bytes).toString('utf8');
+}
+
 // ── Ed25519 ───────────────────────────────────────────────────────────────────
 
 /** Public key (32 bytes) for a 32-byte Ed25519 secret seed. */
