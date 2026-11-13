@@ -1,4 +1,10 @@
 <!-- BEGIN:generated -->
+
+> **Historical record — superseded.** Captures the Facet 2.0.0 / `SovPort` naming
+> pass as it stood then. The tree now carries `facet-sdk@4.0.0` /
+> `facet-store@1.0.6`; `eslint` and `pnpm test` exist and are wired into CI.
+> Current state: [SYNC.md](../../SYNC.md).
+
 # Ecosystem Naming — Findings (sovport)
 
 All counts are over tracked, non-`node_modules` files (the naming-gate script

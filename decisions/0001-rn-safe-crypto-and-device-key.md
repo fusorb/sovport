@@ -1,6 +1,6 @@
 # 0001 — React-Native-safe Ed25519 and a single device key
 
-Status: Accepted (2026-11-11)
+Status: Accepted (2026-11-11). Extended by [ADR 0004](./0004-device-authentication-and-transport.md) — the server-side verification and device-authentication notes below are superseded there.
 
 ## Context
 

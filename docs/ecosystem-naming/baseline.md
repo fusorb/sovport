@@ -1,4 +1,12 @@
 <!-- BEGIN:generated -->
+
+> **Historical record — superseded.** This file captures the Facet 2.0.0 /
+> `SovPort` naming pass as it stood then. Its versions and tooling rows are out of
+> date: the tree now carries `facet-sdk@4.0.0` / `facet-store@1.0.6`, `eslint` and
+> `pnpm test` are installed and wired, and CI runs typecheck + lint + format check
+> + tests. Current state: [SYNC.md](../../SYNC.md) and
+> [docs/audits/2026-11-11-remediation.md](../audits/2026-11-11-remediation.md).
+
 # Ecosystem Naming — Baseline (sovport)
 
 Captured at the start of the Facet 2.0.0 + SovPort naming migration pass.

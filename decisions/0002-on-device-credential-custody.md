@@ -1,6 +1,6 @@
 # 0002 — Self-sovereign (on-device) credential custody
 
-Status: Accepted (2026-11-11)
+Status: Accepted (2026-11-11). Extended by [ADR 0003](./0003-credential-vault-encryption.md) — the vault is now encrypted at rest, and the SDK-types note below is resolved.
 
 ## Context
 

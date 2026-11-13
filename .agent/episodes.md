@@ -229,3 +229,53 @@ Lesson: "the wallet authenticates" is not "the wallet stores credentials" --
   augmentation becomes dead weight the day the SDK catches up.
 
 ================================================================================
+
+EP 07 -- The Wallet Gets Its Own At-Rest Security, And The Docs Catch Up
+--------------------------------------------------------------------------------
+What broke:
+  A security pass found the vault -- the signed VCs the wallet exists to hold --
+  sitting as plaintext JSON in AsyncStorage, and the auth gate keyed on
+  `hasHardwareAsync() && isEnrolledAsync()`, which is false whenever a device has
+  only a passcode. So wallet unlock, device-key creation and challenge signing
+  all proceeded with NO prompt on a passcode-only device. Separately the narrative
+  docs had drifted two major SDK versions behind the tree: README, the planning
+  doc and the ADRs still said `facet-sdk@2.1.1` and `pnpm@12.6.0`, and described
+  casts and a direct-POST workaround the SDK had already superseded.
+
+How we fixed it:
+  -- `d909336` sealed the vault with AES-256-GCM (key in SecureStore,
+     `WHEN_UNLOCKED_THIS_DEVICE_ONLY`), split as a pure `encrypted-storage`
+     decorator plus a thin `vault-crypto` service, with legacy plaintext adopted
+     and re-encrypted on first read.
+  -- `610eac4` moved the gate onto the enrolled security level so passcode-only
+     devices are challenged too; `2dd781d` released the decrypted device key from
+     memory on sign-out; `000a6e9` made release builds refuse a non-HTTPS API URL.
+  -- `8b19671`/`784ae91`/`2023a73` added the in-app QR scanner (expo-camera,
+     QR-only, no microphone permission) with `src/lib/present-link.ts` as the
+     payload parser.
+  -- The docs were reconciled to the tree: README, the integration plan (status
+     per phase), the remediation tracker (follow-ups 1/2/6 closed), AGENTS.md and
+     SYNC.md -- plus two new records, ADR 0003 (vault encryption) and ADR 0004
+     (device authentication + transport). ADRs 0001/0002 were annotated as
+     extended, not rewritten, per their own "never edit after acceptance" rule.
+
+What survived:
+  The portability boundary held: every byte still flows through
+  `@fusorb/facet-sdk` / `facet-store`, with no web-only package, no raw fetch and
+  no direct route call. Web is now documented as unsupported instead of implied --
+  SecureStore (tokens and the vault key) has no browser implementation.
+
+State: manual -> semi-automated. 23/23 unit tests (crypto, vault, encrypted
+  storage, link parser) run in CI beside typecheck, lint and format check. The
+  device-lock refusal and the scanner still need on-device verification, and the
+  accepted linkability trade-off (one device key reused across accounts) is
+  recorded in ADR 0004, not resolved. EP 05's "eslint is not a devDependency" and
+  "CI runs typecheck only" are both superseded as of this episode.
+
+Lesson: "on-device custody" is not "secure custody" -- a wallet holding personal
+  data must encrypt at rest and treat a missing device lock as a failure, not a
+  fallback. And a doc that names a version is a claim that goes stale on its own;
+  reconcile narrative docs in the same pass as the code, or add a check that does
+  it for you.
+
+================================================================================

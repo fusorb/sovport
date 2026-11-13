@@ -1,16 +1,33 @@
 # sovport x SovGrant Integration Plan
 
-> **Plan written 2026-08-05; status re-verified 2026-11-05.** The phase breakdown
-> below is the original intent and is retained for rationale. Facts that no longer
-> matched the tree have been corrected inline.
+> **Plan written 2026-08-05; refreshed 2026-11-13.** The phase breakdown below is
+> the original intent, retained for rationale. Each phase is marked against the
+> tree in "Status vs the tree" below; anything marked *Planned* does **not** exist
+> in code yet.
 
 ## Overview
 
 sovport is an Expo 57 + React Native 0.86 mobile wallet. It is **no longer a blank starter** — auth, MFA, credential offer/accept, presentation, wallet DID, and device pairing/approval screens all exist under `src/app/`, backed by `src/services/*` and a Zustand auth store. SovGrant is a complete sovereign identity backend (Fastify + Prisma + PostgreSQL + Redis) that is ready to be consumed. All server communication goes through **`@fusorb/facet-sdk`** (published, framework-agnostic, pure fetch).
 
+## Status vs the tree (2026-11-13)
+
+| Phase | Scope | Status |
+|-------|-------|--------|
+| 1 | Auth pairing + MFA + SDK foundation | **Partial** — `pair`, `mfa`, `approve` screens and `src/sdk/` wiring exist; register / passkey / forgot-password / reset-password screens are **not built** |
+| 1 | Onboarding system (`services/onboarding.ts`, `app/(onboarding)/`, step renderers, `stores/onboarding-store.ts`) | **Planned** — no code |
+| 2 | Credential dashboard, offer/accept, presentation | **Done** |
+| 2 | QR scanning (expo-camera) | **Done** — `src/app/scan.tsx` |
+| 2 | SD-JWT decoding / verification | **Planned** — the wallet stores and forwards the VC string; it does not decode it |
+| 3 | Wallet DID (`did:key`) registration + display | **Done** |
+| 3 | `did:web` | **Planned** |
+| 4 | Tenant / OAuth / webhook / audit / billing | **Planned** — `tenants`/`billing`/`oauth` are instantiated in `src/sdk/index.ts` but never called |
+
+Everything marked **Planned** is absent from `src/` — treat the bullets below as
+intent, not as a description of current behaviour.
+
 ## What SovGrant Exposes (via @fusorb/facet-sdk)
 
-The SDK is published on npm (`@fusorb/facet-sdk`, currently pinned at v2.1.1). It is pure TypeScript + fetch - no DOM, no React, no framework deps - so it runs unchanged in React Native. sovgrant's own `src/sdk/index.ts` is a singleton wrapper that re-exports the same classes; the wallet can depend on the npm package directly.
+The SDK is published on npm as `@fusorb/facet-sdk@4.0.0`. It is pure TypeScript + fetch - no DOM, no React, no framework deps - so it runs unchanged in React Native. sovgrant's own `src/sdk/index.ts` is a singleton wrapper that re-exports the same classes; the wallet can depend on the npm package directly.
 
 | SDK class | Key methods |
 |-----------|-------------|
@@ -39,7 +56,7 @@ SovGrant already has a complete onboarding architecture - the wallet does **not*
 - Idempotent start - calling twice returns same progress
 - `completedAt` auto-sets when all steps are done
 
-**Wallet owns:**
+**Wallet owns (planned — not yet built):**
 - `services/onboarding.ts` - thin wrapper over `IdentitySdk` onboarding methods
 - `app/(onboarding)/` - stepper screens with step renderers
 - Step types the wallet can render: WelcomeCard, FeatureHighlight, ActionPrompt, FormStep, BiometricSetup, CredentialIntro
@@ -63,7 +80,7 @@ SovGrant already has a complete onboarding architecture - the wallet does **not*
 - `stores/auth-store.ts` - Zustand store (port sovgrant's `auth.store.ts` pattern)
 - `stores/onboarding-store.ts` - local onboarding completion state
 
-**Auth screens - `app/(auth)/`:**
+**Auth screens - `app/(auth)/` (planned except MFA, which ships as `src/app/mfa.tsx`):**
 - login, register, MFA verify, passkey, forgot-password, reset-password
 
 **Onboarding screens - `app/(onboarding)/`:**

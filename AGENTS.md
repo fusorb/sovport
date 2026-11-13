@@ -29,9 +29,13 @@ Before any rename, read the Fusorb naming ledger
 pnpm install
 pnpm typecheck
 pnpm lint
+pnpm format:check
+pnpm test
 pnpm start   # expo start
 ```
 
 ## Local scratch
 
-Use `.agent/` for local-only planning output; it is gitignored and never committed.
+Use `.agent/` for local-only planning output. Everything under it is gitignored
+**except** `.agent/episodes.md` (the episodic canon), which is tracked and is
+appended to, never rewritten.

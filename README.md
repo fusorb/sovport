@@ -2,7 +2,7 @@
 
 Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, SovPort connects to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
 
-> **Status (2026-11-11): integration in progress.** Auth, MFA, credential offer/accept, presentation, wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@2.1.1`; screens live under `src/app/`. Accepted credentials are held on-device (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
+> **Status (2026-11-13): integration in progress.** Auth, MFA, credential offer/accept, presentation (deep link + in-app QR scanner), wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@4.0.0`; screens live under `src/app/`. Accepted credentials are held on-device, encrypted at rest (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
 
 ## Vision
 
@@ -29,12 +29,21 @@ SovPort consumes **`@fusorb/facet-sdk`** — the published, framework-agnostic T
 
 ### Crypto & custody
 
-All keys and signatures use **Ed25519** via `@noble/curves` (pure JS, no `crypto.subtle`) with randomness from `expo-crypto`, so the wallet works identically on iOS, Android, and web. A single device keypair backs both the paired-device registration and the wallet `did:key`. Presentation proofs are detached EdDSA JWS. Accepted credentials are stored on-device. Rationale: [ADR 0001](./decisions/0001-rn-safe-crypto-and-device-key.md), [ADR 0002](./decisions/0002-on-device-credential-custody.md).
+All keys and signatures use **Ed25519** via `@noble/curves` (pure JS, no `crypto.subtle`) with randomness from `expo-crypto`. A single device keypair backs both the paired-device registration and the wallet `did:key`. Presentation proofs are detached EdDSA JWS. Accepted credentials are held on-device and **encrypted at rest** with AES-256-GCM, with the key held in the OS keystore/Keychain. Rationale: [ADR 0001](./decisions/0001-rn-safe-crypto-and-device-key.md), [ADR 0002](./decisions/0002-on-device-credential-custody.md), [ADR 0003](./decisions/0003-credential-vault-encryption.md), [ADR 0004](./decisions/0004-device-authentication-and-transport.md).
+
+**Platforms:** iOS and Android. Sessions and the vault key use `expo-secure-store`, which has no browser implementation — so the web target cannot hold credentials or sessions and is **not supported**.
+
+### Security
+
+- **At rest** — VCs are AES-256-GCM sealed; the key never leaves the device and never syncs to a backup.
+- **Device authentication** — key creation, signing and wallet unlock require the enrolled device lock (biometrics *or* passcode). A device with no lock at all is refused (`decisions/0004`).
+- **Transport** — release builds refuse to start against a non-HTTPS `EXPO_PUBLIC_API_URL`.
+- **Presentations** — the QR scanner accepts `sovport://present?sessionId=…&challenge=…`, an equivalent `https://` URL, or a raw JSON `{sessionId, challenge}` payload.
 
 ## Prerequisites
 
 - Node.js >= 22
-- pnpm 12 (`packageManager` pins `pnpm@12.6.0`)
+- pnpm 12 (`packageManager` pins `pnpm@12.18.0`)
 - [SovGrant](https://github.com/fusorb/sovgrant) backend running locally (or a shared dev instance)
 
 ## Getting Started
@@ -70,12 +79,15 @@ The wallet expects the SovGrant API at `http://localhost:4000/api/v1` by default
 src/
 ├── app/           # expo-router screens (file-based routing):
 │                  #   index (dashboard), mfa, pair, approve, offer,
-│                  #   present, did, _layout
+│                  #   present, scan, did, _layout
 ├── components/    # Reusable UI and wallet components
 ├── services/      # SovGrant SDK clients and business logic
 │                  #   (auth, biometric, credentials, credential-vault,
-│                  #    device-identity, presentation, wallet-did)
-├── lib/           # Pure, testable primitives (did-key, crypto, kv)
+│                  #    device-identity, presentation, vault-crypto,
+│                  #    wallet-did)
+├── lib/           # Pure, testable primitives (did-key, credential-vault,
+│                  #   encrypted-storage, kv, present-link) plus the thin
+│                  #   platform crypto layer (crypto.ts)
 ├── stores/        # Zustand state management (auth-store)
 ├── hooks/         # Custom React hooks
 ├── constants/     # Theme, spacing, configuration
