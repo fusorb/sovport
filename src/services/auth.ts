@@ -1,5 +1,6 @@
 import { auth, sgClient } from '@/sdk';
 import { credentialVault } from '@/services/credential-vault';
+import { releaseDeviceIdentity } from '@/services/device-identity';
 import { walletDidService } from '@/services/wallet-did';
 import { kv } from '@/lib/kv';
 import { useAuthStore } from '@/stores/auth-store';
@@ -57,7 +58,10 @@ export const authService = {
       await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
     } catch {}
 
-    // Drop local wallet state so a new account starts clean.
+    // Drop local wallet state so a new account starts clean. The device key
+    // itself is kept (it is the device's identity across sign-ins); only the
+    // in-memory copy of the secret is released.
+    releaseDeviceIdentity();
     await credentialVault.clear().catch(() => {});
     await walletDidService.clearRegistration().catch(() => {});
     await kv.remove('sovport-did-skip').catch(() => {});

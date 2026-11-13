@@ -103,3 +103,12 @@ export async function clearDeviceIdentity(): Promise<void> {
   cache = null;
   await SecureStore.deleteItemAsync(STORE_KEY);
 }
+
+/**
+ * Drop the in-memory copy of the device key. The key stays in the secure store,
+ * so the device keeps its identity across sign-ins; this only limits how long
+ * the decrypted secret sits in RAM after sign-out.
+ */
+export function releaseDeviceIdentity(): void {
+  cache = null;
+}
