@@ -4,10 +4,9 @@
 // challenge signing. SovPort never stores the user's password; the paired
 // device token is unlocked behind device authentication.
 //
-// Threat model: an attacker holding an unlocked phone. If the device has any
-// lock (biometrics or passcode), a sensitive operation must satisfy it first.
-// A device with no lock at all has no secret to check against — that case is
-// left permissive and can only be changed by enrolling a device lock.
+// Policy (ADR 0004): a device must have a lock — biometrics or passcode — to
+// perform a sensitive operation. A device with no lock at all has nothing to
+// authenticate against, so the operation is refused rather than allowed.
 
 import * as LocalAuthentication from 'expo-local-authentication';
 
@@ -36,15 +35,14 @@ export async function biometricKind(): Promise<BiometricKind> {
 /**
  * Require the device owner to authenticate before a sensitive operation.
  *
- * Uses the enrolled *security level*, not `isEnrolledAsync` (which reports only
- * biometrics): a passcode-only device previously slipped through and was allowed
- * with no prompt. `disableDeviceFallback: false` accepts the device passcode, so
- * every locked device is challenged. Only a device with no lock at all — nothing
- * to authenticate against — passes without a prompt.
+ * Uses the enrolled *security level* rather than `isEnrolledAsync` (which
+ * reports only biometrics), so a passcode-only device is challenged too.
+ * `disableDeviceFallback: false` accepts the device passcode. A device with no
+ * lock at all has nothing to authenticate against and is refused.
  */
 export async function unlockWithBiometrics(promptMessage = 'Unlock sovport'): Promise<boolean> {
   const level = await LocalAuthentication.getEnrolledLevelAsync();
-  if (level === LocalAuthentication.SecurityLevel.NONE) return true;
+  if (level === LocalAuthentication.SecurityLevel.NONE) return false;
 
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage,

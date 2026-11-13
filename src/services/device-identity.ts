@@ -57,7 +57,9 @@ export async function getDeviceIdentity(): Promise<DeviceIdentity> {
   }
 
   const unlocked = await unlockWithBiometrics('Create your SovPort device key');
-  if (!unlocked) throw new Error('Biometric authentication required to create the device key');
+  if (!unlocked) {
+    throw new Error('A device lock (passcode or biometrics) is required to create your device key');
+  }
 
   const secretKey = await randomBytes(32);
   const publicKey = ed25519PublicKey(secretKey);
@@ -92,7 +94,9 @@ export async function getDeviceDid(): Promise<string> {
 /** Ed25519-sign a challenge (base64url signature), gated behind biometrics. */
 export async function signWithDeviceKey(challenge: string): Promise<string> {
   const unlocked = await unlockWithBiometrics('Authenticate with your device key');
-  if (!unlocked) throw new Error('Biometric authentication required');
+  if (!unlocked) {
+    throw new Error('A device lock (passcode or biometrics) is required to sign');
+  }
 
   const { secretKey } = await getDeviceIdentity();
   return toBase64Url(ed25519Sign(utf8ToBytes(challenge), secretKey));
