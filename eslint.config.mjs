@@ -8,10 +8,11 @@ export default [
   },
   {
     // Node build scripts (run outside the app bundle).
-    files: ['gen-snapshot.js', 'scripts/**/*.js'],
+    files: ['gen-snapshot.js', 'scripts/**/*.js', 'scripts/**/*.mjs'],
     languageOptions: {
       globals: {
         __dirname: 'readonly',
+        console: 'readonly',
         process: 'readonly',
         require: 'readonly',
         module: 'readonly',
