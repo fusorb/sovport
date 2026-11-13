@@ -9,10 +9,10 @@
 // Pure (no platform APIs), so it unit-tests in plain Node and is shared by the
 // deep-link route and the in-app scanner.
 
-export interface PresentRequest {
+export type PresentRequest = {
   sessionId: string;
   challenge: string;
-}
+};
 
 function decodeComponent(value: string): string {
   try {

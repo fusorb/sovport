@@ -83,6 +83,15 @@ export default function WalletHomeScreen() {
           </Pressable>
         )}
 
+        {isAuthenticated && (
+          <Pressable
+            style={({ pressed }) => [styles.scanButton, pressed && styles.pressed]}
+            onPress={() => router.push('/scan')}
+          >
+            <ThemedText style={styles.scanText}>Scan to present</ThemedText>
+          </Pressable>
+        )}
+
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">Credentials</ThemedText>
           {loading ? (
@@ -145,6 +154,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#4AD3F5',
     gap: Spacing.one,
+  },
+  scanButton: {
+    backgroundColor: '#4AD3F5',
+    borderRadius: Spacing.two,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
+  scanText: {
+    color: '#000',
+    fontWeight: '600',
   },
   section: {
     gap: Spacing.three,
