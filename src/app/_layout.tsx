@@ -73,6 +73,7 @@ export default function RootLayout() {
           <Stack.Screen name="mfa" options={{ headerShown: false }} />
           <Stack.Screen name="offer" options={{ title: 'Accept offer' }} />
           <Stack.Screen name="present" options={{ title: 'Present credential' }} />
+          <Stack.Screen name="scan" options={{ title: 'Scan to present' }} />
           <Stack.Screen name="did" options={{ title: 'Wallet identity' }} />
         </Stack>
       </PairingGate>
