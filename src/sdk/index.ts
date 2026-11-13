@@ -15,7 +15,22 @@ import { useAuthStore } from '@/stores/auth-store';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-export const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+const DEFAULT_BASE_URL = 'http://localhost:4000/api/v1';
+
+/**
+ * Access tokens and credential presentations travel over this origin, so a
+ * release build must never point at a non-HTTPS URL. Failing fast at startup
+ * beats silently sending bearer tokens over cleartext.
+ */
+function resolveBaseUrl(): string {
+  const configured = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_BASE_URL;
+  if (!__DEV__ && !configured.startsWith('https://')) {
+    throw new Error(`EXPO_PUBLIC_API_URL must use https in release builds (got "${configured}")`);
+  }
+  return configured;
+}
+
+export const BASE_URL = resolveBaseUrl();
 
 // ── Client + refresh bridge (facet-store) ─────────────────────────────────────
 
