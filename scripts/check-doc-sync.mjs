@@ -22,12 +22,13 @@ const DOCS = ['README.md', 'docs/sovport-integration-planning.md', 'SYNC.md'];
 
 const CLAIMS = [
   {
-    pattern: /@fusorb\/facet-sdk@(\d+\.\d+\.\d+)/g,
+    // Both spellings count: SYNC.md names the packages in shorthand.
+    pattern: /(?:@fusorb\/)?facet-sdk@(\d+\.\d+\.\d+)/g,
     expected: dep('@fusorb/facet-sdk'),
     label: '@fusorb/facet-sdk',
   },
   {
-    pattern: /@fusorb\/facet-store@(\d+\.\d+\.\d+)/g,
+    pattern: /(?:@fusorb\/)?facet-store@(\d+\.\d+\.\d+)/g,
     expected: dep('@fusorb/facet-store'),
     label: '@fusorb/facet-store',
   },
