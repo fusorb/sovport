@@ -1,6 +1,6 @@
 # 0004 — Device authentication and transport policy
 
-Status: Accepted (2026-11-13)
+Status: Accepted (2026-11-13). Extended by [ADR 0005](./0005-device-bound-secrets-and-session-durability.md) — every wallet secret is stored device-only, the decrypted device key is no longer held in memory (`releaseDeviceIdentity` is gone), and presentation signing is gated behind device authentication too.
 
 ## Context
 
