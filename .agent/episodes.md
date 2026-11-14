@@ -53,7 +53,7 @@ What broke:
   Two changes landed together (`02f3925` / `8a17fd5`, 2026-10-26): the product
   rename ArcWallet -> SovPort, and the Facet 2.0.0 API bump already pinned in
   the tree. `pnpm typecheck` was RED with 4 errors and the naming gate reported
-  4 renamed tokens. (The audit lives in `docs/ecosystem-naming/`:
+   4 renamed tokens. (The audit now lives in `docs/archive/ecosystem-naming/`:
   `baseline.md`, `report.md`, `findings.md`.) The errors:
   (1) `src/app/_layout.tsx:7` imported `SovGrantClient`, which the SDK index
       never exported;

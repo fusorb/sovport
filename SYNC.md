@@ -42,4 +42,5 @@ current. Never rename the live `arcevocirqle` brand, domain, or email addresses.
 README / the integration plan / this file match `package.json`, so a version bump
 that forgets the docs fails CI instead of drifting silently.
 
-See [docs/audits/](./docs/audits/) for the audit trail and open follow-ups.
+See [docs/archive/](./docs/archive/) for the audit trail (dated audits and
+remediation are completed records, kept for reference).

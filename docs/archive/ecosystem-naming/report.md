@@ -4,8 +4,8 @@
 > tree now carries `facet-sdk@4.0.0` / `facet-store@1.0.6`, and `eslint` +
 > `pnpm test` exist and run in CI. The "needs owner decision" item about
 > `docs/sovport-integration-planning.md` being stale is **closed** — that doc was
-> refreshed 2026-11-13. Current state: [SYNC.md](../../SYNC.md) and
-> [docs/audits/2026-11-11-remediation.md](../audits/2026-11-11-remediation.md).
+> refreshed 2026-11-13. Current state: [SYNC.md](../../../SYNC.md) and
+> [remediation](../audits/2026-11-11-remediation.md).
 
 # Ecosystem Naming — Report (sovport)
 

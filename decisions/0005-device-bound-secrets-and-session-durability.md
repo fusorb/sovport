@@ -6,7 +6,7 @@ Status: Accepted (2026-11-13). Extends [ADR 0001](./0001-rn-safe-crypto-and-devi
 
 ## Context
 
-The 2026-11-13 audit (`docs/audits/2026-11-13-repo-audit.md`) found that the
+The 2026-11-13 audit (`docs/archive/audits/2026-11-13-repo-audit.md`) found that the
 device-bound story was only true of the vault key:
 
 - ADR 0003 gave the **vault key** `WHEN_UNLOCKED_THIS_DEVICE_ONLY`, but the

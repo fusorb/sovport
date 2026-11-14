@@ -95,7 +95,7 @@ launch.
 
 `src/services/api-client.ts` builds its own `SgClient` + `AuthSdk` and uses
 `sg_access_token` / `sg_refresh_token` keys. **Nothing imports it** — the live
-client is `src/sdk/index.ts`. `docs/ecosystem-naming/report.md` already claims
+client is `src/sdk/index.ts`. `docs/archive/ecosystem-naming/report.md` already claims
 this file was deleted, and README documents it as if live.
 
 **Needed:** delete the file; update README.

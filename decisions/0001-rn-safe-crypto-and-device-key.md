@@ -1,6 +1,6 @@
 # 0001 — React-Native-safe Ed25519 and a single device key
 
-Status: Accepted (2026-11-11). Extended by [ADR 0004](./0004-device-authentication-and-transport.md) (device authentication + transport) and [ADR 0005](./0005-device-bound-secrets-and-session-durability.md) (device-bound secrets). The device-authentication note below is superseded there; the server-side note is resolved — SovGrant now requires and verifies `deviceId` + `signature` (see `docs/audits/2026-11-11-remediation.md`).
+Status: Accepted (2026-11-11). Extended by [ADR 0004](./0004-device-authentication-and-transport.md) (device authentication + transport) and [ADR 0005](./0005-device-bound-secrets-and-session-durability.md) (device-bound secrets). The device-authentication note below is superseded there; the server-side note is resolved — SovGrant now requires and verifies `deviceId` + `signature` (see `docs/archive/audits/2026-11-11-remediation.md`).
 
 ## Context
 
@@ -35,5 +35,5 @@ therefore secret material.
 - Changing key material rotates the `did:key`; server-side registrations must be
   refreshed. Acceptable pre-production.
 - SovGrant currently accepts the approval `signature` but does not verify it
-  (see `docs/audits/2026-11-11-remediation.md`); the wallet now sends a valid
+  (see `docs/archive/audits/2026-11-11-remediation.md`); the wallet now sends a valid
   signature so enforcement can be enabled server-side without a client change.

@@ -28,6 +28,6 @@ A self-sovereign wallet must hold its own credentials.
   (`acceptOffer` is typed `void` though it returns `{ credentialId, credential }`;
   `registerWalletDid` is typed `void` though it returns the DID document). The
   wallet works around this with a documented cast; the SDK types should be
-  widened (see `docs/audits/2026-11-11-remediation.md`).
+  widened (see `docs/archive/audits/2026-11-11-remediation.md`).
 - Large credentials are stored in AsyncStorage, not SecureStore (which has a
   ~2 KB value limit); secrets (tokens, device key) remain in SecureStore.
