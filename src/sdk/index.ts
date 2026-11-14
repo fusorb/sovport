@@ -11,6 +11,7 @@ import {
   type User,
 } from '@fusorb/facet-sdk';
 import { createZustandTokenStorage } from '@fusorb/facet-store';
+import { createSecurePersistAdapter } from '@fusorb/facet-store/native';
 import { useAuthStore } from '@/stores/auth-store';
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -60,17 +61,7 @@ const tokenStorage = createZustandTokenStorage({
     clearAuth: () => useAuthStore.getState().clearAuth(),
   },
   sdk: { refresh: (token: string) => authSdk!.refresh(token) },
-  persist: {
-    getAccessToken: () => useAuthStore.getState().accessToken,
-    setAccessToken: (token) => {
-      const store = useAuthStore.getState();
-      if (token === null) {
-        void store.forget().catch(() => {});
-      } else {
-        void store.persist().catch(() => {});
-      }
-    },
-  },
+  persist: createSecurePersistAdapter(useAuthStore),
 });
 
 const client = new SgClient({

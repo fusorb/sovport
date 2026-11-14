@@ -2,7 +2,7 @@
 
 Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, SovPort connects to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
 
-> **Status (2026-11-13): integration in progress.** Auth, MFA, credential offer/accept, presentation (deep link + in-app QR scanner), wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@4.0.1`; screens live under `src/app/`. Accepted credentials are held on-device, encrypted at rest (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
+> **Status (2026-11-13): integration in progress.** Auth, MFA, credential offer/accept, presentation (deep link + in-app QR scanner), wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@4.1.0`; screens live under `src/app/`. Accepted credentials are held on-device, encrypted at rest (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
 
 ## Vision
 

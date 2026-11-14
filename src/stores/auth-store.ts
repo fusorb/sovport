@@ -1,144 +1,24 @@
-import type { User } from '@fusorb/facet-sdk';
-import type { AuthState } from '@fusorb/facet-store';
 import * as SecureStore from 'expo-secure-store';
-import { create } from 'zustand';
+import type { User } from '@fusorb/facet-sdk';
+import { createSecureAuthStore, type SecureAuthState } from '@fusorb/facet-store/native';
 
 export { type User };
 
 export const TOKEN_STORAGE_KEY = 'sovport-auth';
-
-/**
- * The session blob holds a live access token and refresh token, so it is written
- * device-only: it never syncs to a backup and is never restored onto another
- * device (ADR 0005).
- */
-const STORE_OPTIONS: SecureStore.SecureStoreOptions = {
-  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-};
-
-/**
- * SecureStore writes are serialized so a sign-out can never be overtaken by a
- * write that was still in flight (a token refresh landing right after logout
- * would otherwise resurrect the session it just dropped).
- */
-let pendingWrite: Promise<void> = Promise.resolve();
-
-function serialize(write: () => Promise<void>): Promise<void> {
-  pendingWrite = pendingWrite.then(write, write);
-  return pendingWrite;
-}
-
-interface PersistedSession {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
-  sessionId?: string;
-}
+export type SovportAuthState = SecureAuthState;
 
 /**
  * sovport-auth store.
  *
- * Extends the facet-store {@link AuthState} shape with two React-Native-specific
- * concerns that the framework-agnostic store deliberately omits:
- *
- * - `sessionId` — needed to POST /auth/logout on sign-out.
- * - `persist` / `forget` / `restore` — SecureStore hydration on launch and
- *   removal on sign-out (the facet-store has no platform storage; that's a
- *   consumer responsibility).
- *
- * The store's state exposes getState / setTokens / clearAuth; a thin adapter
- * adapts the zustand hook to `TokenStoreLike`, which feeds the sgClient 401
- * refresh / clear-auth bridge in `createZustandTokenStorage`.
+ * The SecureStore-backed session store lives in `@fusorb/facet-store/native`
+ * (`createSecureAuthStore`). This module keeps the `@/stores/auth-store` import
+ * path stable for the rest of the app and supplies the platform-specific secure
+ * backend and device-only keychain policy (ADR 0005).
  */
-export interface SovportAuthState extends Omit<AuthState, 'setAuth'> {
-  sessionId: string | null;
-  setAuth: (user: User, accessToken: string, refreshToken: string, sessionId?: string) => void;
-  /** Persist the current session to the secure store. */
-  persist: () => Promise<void>;
-  /** Drop the persisted session (sign-out, or a refresh the server rejected). */
-  forget: () => Promise<void>;
-  /** Restore a persisted session on launch. Returns true if one was found. */
-  restore: () => Promise<boolean>;
-}
-
-export const useAuthStore = create<SovportAuthState>((set, get) => ({
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  sessionId: null,
-  isAuthenticated: false,
-  isLoading: true,
-  error: null,
-
-  setAuth: (user, accessToken, refreshToken, sessionId) =>
-    set({
-      user,
-      accessToken,
-      refreshToken,
-      sessionId: sessionId ?? null,
-      isAuthenticated: true,
-      isLoading: false,
-    }),
-
-  setUser: (user) => set({ user }),
-
-  setTokens: (accessToken, refreshToken) =>
-    set((state) => ({
-      accessToken,
-      ...(refreshToken ? { refreshToken } : {}),
-      isAuthenticated: state.isAuthenticated || accessToken !== null,
-    })),
-
-  clearAuth: () =>
-    set({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      sessionId: null,
-      isAuthenticated: false,
-      isLoading: false,
-    }),
-
-  setLoading: (isLoading) => set({ isLoading }),
-
-  setError: (error) => set({ error }),
-
-  persist: () =>
-    serialize(async () => {
-      const { user, accessToken, refreshToken, sessionId } = get();
-      if (!user || !accessToken) return;
-      const session: PersistedSession = {
-        user,
-        accessToken,
-        refreshToken: refreshToken ?? '',
-        sessionId: sessionId ?? undefined,
-      };
-      await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, JSON.stringify(session), STORE_OPTIONS);
-    }),
-
-  forget: () => serialize(() => SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY, STORE_OPTIONS)),
-
-  restore: async () => {
-    try {
-      const raw = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY, STORE_OPTIONS);
-      if (!raw) return false;
-      const parsed = JSON.parse(raw) as PersistedSession;
-      if (!parsed.accessToken || !parsed.user) return false;
-      set({
-        user: parsed.user,
-        accessToken: parsed.accessToken,
-        refreshToken: parsed.refreshToken,
-        sessionId: parsed.sessionId ?? null,
-        isAuthenticated: true,
-      });
-      return true;
-    } catch {
-      await get()
-        .forget()
-        .catch(() => {});
-      return false;
-    } finally {
-      set({ isLoading: false });
-    }
+export const useAuthStore = createSecureAuthStore({
+  storageKey: TOKEN_STORAGE_KEY,
+  backend: SecureStore,
+  storageOptions: {
+    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   },
-}));
+});
