@@ -279,3 +279,72 @@ Lesson: "on-device custody" is not "secure custody" -- a wallet holding personal
   it for you.
 
 ================================================================================
+
+EP 08 -- The Pass That Made Every Gate Real
+--------------------------------------------------------------------------------
+What broke:
+  Two audits, one repo. The first found seven live gaps: the 401 bridge refreshed
+  tokens in memory but never persisted the rotated bundle, so a refresh could be
+  overtaken by a sign-out and a refused one left the dead session on disk; only
+  the vault key was device-bound -- the device Ed25519 key and the session blob
+  were backup-restorable; materializing the device secret was ungated, so a
+  signature could be produced with no device prompt; `walletDidService.register()`
+  discarded the DID SovGrant returned and kept a locally derived one; the
+  approval screen raced two device prompts on a fresh device and its Cancel never
+  reached the server; an offer deep link auto-accepted a credential; and a
+  cancelled OS prompt re-fired the unlock prompt on every navigation.
+  The second asked whether the companion app had drifted from SovGrant and
+  answered with evidence -- one real desync: logout sent `sessionId ?? ''`, and
+  SovGrant's schema is 40-128 chars, so that call could only 400 and left the
+  server session (and its refresh token) alive behind a "Disconnect".
+
+How we fixed it:
+  -- `127a387` bound the wallet's secrets to the device and gated signing
+     (ADR 0005): the device key lives only in a `WHEN_UNLOCKED_THIS_DEVICE_ONLY`
+     keychain class and is read inside each signing call rather than cached,
+     with a one-time delete+add migration for records written before the policy;
+     `did-key` takes an injected signer so the gate sits in the caller; the auth
+     store holds a device-only session blob with a serialized `forget()`; the SDK
+     bridge persists both refresh outcomes through facet-store's documented
+     `persist` hook. Consent: offers no longer auto-accept from a deep link,
+     Cancel rejects server-side, approvals sequence their prompts, and a
+     presentation carries the DID SovGrant registered.
+  -- `545ca37` re-locked the wallet whenever it leaves the foreground (ADR 0006),
+     with a generation guard so a prompt the OS dismissed cannot report its
+     result over a fresh one, and an explicit Unlock screen when a prompt is
+     cancelled or throws. `inactive` is deliberately not a trigger: iOS reports
+     it for the biometric prompt itself.
+  -- `f2715f1` closed the doc-sync guard's hole -- scope-less `facet-sdk@4.0.1`
+     escaped the regex, so the check built to catch version drift could not fail
+     on the doc most likely to drift.
+  -- `68056b8` / `731a905` / `80eed56` landed the 4.0.1 pin, ADRs 0005/0006 with
+     the audit that produced them, and the README / SYNC / plan reconciliation.
+
+What survived:
+  The boundary held: every byte still flows through `@fusorb/facet-sdk` /
+  `facet-store`, and the wallet owns only its SecureStore adapter, because facet
+  ships no React Native storage adapter. The contracts were checked against
+  SovGrant's code rather than its docs -- paired-device keys, the approval
+  signature, the wallet-DID JWK, and the detached JWS (`nonce` = session
+  challenge, `credentialHash` over the exact submitted string, `kid` = the
+  registered DID, which `verifyDetachedJws` resolves against its
+  `DecentralizedIdentifier` row). SovGrant `dcda05b`, re-checked at `0205185`:
+  no drift, and both gaps raised with them are fixed.
+
+State: the tree is clean and the pass is committed as an ADR-driven series (deps
+  pin, ADRs + audit, ADR 0005 code, ADR 0006 lock, docs reconciliation, doc-sync
+  guard) -- not yet pushed. F6-F10 (Expo LICENSE, template script, tracked
+  `.expo` type, `web` script + unused deps, lib-only tests) are a documented
+  backlog by choice. Still manual: the AES vault path needs an on-device smoke
+  test (expo-crypto is native), the approval screen cannot yet show who/where is
+  signing in (SovGrant's poll returns only status -- asked for), and SovGrant's
+  own end-to-end test (pair -> MFA device approval -> approve from the wallet)
+  is the last cross-repo validation.
+
+Lesson: a gate is only as real as the lifecycle event that triggers it -- lock on
+  `background`, never `inactive`, because the OS reports `inactive` for your own
+  biometric prompt. And an empty string is not a missing value: a client that
+  cannot name a session should skip the revocation call, not send a request that
+  can only fail while the session stays alive.
+
+================================================================================
