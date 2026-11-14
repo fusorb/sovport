@@ -2,7 +2,7 @@
 
 Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + React Native 0.86, SovPort connects to the [SovGrant](https://github.com/fusorb/sovgrant) identity and access management backend for decentralized identity, verifiable credentials, and secure authentication.
 
-> **Status (2026-11-13): integration in progress.** Auth, MFA, credential offer/accept, presentation (deep link + in-app QR scanner), wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@4.0.0`; screens live under `src/app/`. Accepted credentials are held on-device, encrypted at rest (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
+> **Status (2026-11-13): integration in progress.** Auth, MFA, credential offer/accept, presentation (deep link + in-app QR scanner), wallet DID, and device pairing/approval flows are wired against `@fusorb/facet-sdk@4.0.1`; screens live under `src/app/`. Accepted credentials are held on-device, encrypted at rest (see [`decisions/`](./decisions/)). See [docs/sovport-integration-planning.md](./docs/sovport-integration-planning.md) for the phased plan and [docs/audits/](./docs/audits/) for the audit + remediation history. Backend expected at `http://localhost:4000/api/v1` (or `EXPO_PUBLIC_API_URL`).
 
 ## Vision
 
@@ -35,8 +35,8 @@ All keys and signatures use **Ed25519** via `@noble/curves` (pure JS, no `crypto
 
 ### Security
 
-- **At rest** — VCs are AES-256-GCM sealed; the key never leaves the device and never syncs to a backup.
-- **Device authentication** — key creation, signing and wallet unlock require the enrolled device lock (biometrics *or* passcode). A device with no lock at all is refused (`decisions/0004`).
+- **At rest** — VCs are AES-256-GCM sealed; the session, the device key and the vault key are all stored **device-only**, so a backup restored onto another device carries no usable secrets (`decisions/0005`).
+- **Device authentication** — wallet unlock (at launch **and on every return from the background**, `decisions/0006`), device-key creation, approval signing and presentation signing require the enrolled device lock (biometrics *or* passcode). A device with no lock at all is refused (`decisions/0004`, `decisions/0005`).
 - **Transport** — release builds refuse to start against a non-HTTPS `EXPO_PUBLIC_API_URL`.
 - **Presentations** — the QR scanner accepts `sovport://present?sessionId=…&challenge=…`, an equivalent `https://` URL, or a raw JSON `{sessionId, challenge}` payload.
 

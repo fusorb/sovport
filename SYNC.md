@@ -19,8 +19,18 @@ Last synced: 2026-11-13, against fusorb `634cef02`.
   `SgClient` passes are complete; re-verified against the `634cef02` ledger.
 - **Narrative docs: reconciled 2026-11-13.** README, the integration plan, the
   remediation tracker and the ADRs were re-checked against the tree — SDK pin
-  (`facet-sdk@4.0.0`, `facet-store@1.0.6`), `pnpm@12.18.0`, CI contents, the
+  (`facet-sdk@4.0.1`, `facet-store@1.0.6`), `pnpm@12.18.0`, CI contents, the
   route/service lists, and the security decisions (ADRs 0003/0004).
+- **SovGrant contract: re-verified 2026-11-13** against sovgrant `dcda05b`. Every
+  path the wallet calls exists under `/api/v1` (auth / identity / credentials),
+  the paired-device public key and approval signature match
+  `verifyEd25519Signature`, the wallet-DID JWK matches `JwkSchema`, and the
+  presentation proof matches `verify-present.route.ts` — `credentialHash` over
+  the exact submitted credential, `nonce` = the session challenge, and `kid` =
+  the DID SovGrant registered. Re-checked at `0205185`: the four commits after
+  that touch guards, not this surface, and both gaps raised with them (the stale
+  Ed25519 TODO in their launch audit, and the misleading `Session.id` default)
+  are fixed.
 
 ## Staying in sync
 

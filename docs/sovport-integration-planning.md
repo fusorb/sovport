@@ -27,7 +27,7 @@ intent, not as a description of current behaviour.
 
 ## What SovGrant Exposes (via @fusorb/facet-sdk)
 
-The SDK is published on npm as `@fusorb/facet-sdk@4.0.0`. It is pure TypeScript + fetch - no DOM, no React, no framework deps - so it runs unchanged in React Native. sovgrant's own `src/sdk/index.ts` is a singleton wrapper that re-exports the same classes; the wallet can depend on the npm package directly.
+The SDK is published on npm as `@fusorb/facet-sdk@4.0.1`. It is pure TypeScript + fetch - no DOM, no React, no framework deps - so it runs unchanged in React Native. sovgrant's own `src/sdk/index.ts` is a singleton wrapper that re-exports the same classes; the wallet can depend on the npm package directly.
 
 | SDK class | Key methods |
 |-----------|-------------|
