@@ -6,6 +6,15 @@ import { useAuthStore } from '@/stores/auth-store';
 
 const REGISTRATION_KEY = 'sovport-did-registration';
 
+/**
+ * A did:key belongs to the device key that backs it, so the registration record
+ * is stored device-only: restoring it onto another device would claim an
+ * identifier whose private key is not there (ADR 0005).
+ */
+const STORE_OPTIONS: SecureStore.SecureStoreOptions = {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+};
+
 interface DidRegistration {
   providerWalletId: string;
   did: string;
@@ -22,17 +31,17 @@ interface DidRegistration {
 export const walletDidService = {
   /** True if this device already registered a DID with SovGrant. */
   async hasRegisteredDid(): Promise<boolean> {
-    return (await SecureStore.getItemAsync(REGISTRATION_KEY)) !== null;
+    return (await SecureStore.getItemAsync(REGISTRATION_KEY, STORE_OPTIONS)) !== null;
   },
 
   /** Forget the local registration (e.g. on disconnect). */
   async clearRegistration(): Promise<void> {
-    await SecureStore.deleteItemAsync(REGISTRATION_KEY);
+    await SecureStore.deleteItemAsync(REGISTRATION_KEY, STORE_OPTIONS);
   },
 
   /** The full did:key this device presents with. */
   async getRegisteredDid(): Promise<string | null> {
-    const stored = await SecureStore.getItemAsync(REGISTRATION_KEY);
+    const stored = await SecureStore.getItemAsync(REGISTRATION_KEY, STORE_OPTIONS);
     if (!stored) return null;
     try {
       return (JSON.parse(stored) as DidRegistration).did;
@@ -42,17 +51,25 @@ export const walletDidService = {
   },
 
   /**
+   * The DID a presentation proof should name: the registered identifier when
+   * there is one (SovGrant registered it, so a verifier can resolve it), else
+   * the DID derived from this device's key.
+   */
+  async getPresentationDid(): Promise<string> {
+    return (await walletDidService.getRegisteredDid()) ?? getDeviceDid();
+  },
+
+  /**
    * Register the wallet DID with SovGrant: send the public JWK, remember the
-   * resulting did:key locally so we don't re-register on every launch.
+   * DID SovGrant registered locally so we don't re-register on every launch.
    */
   async register(): Promise<string> {
     if (!useAuthStore.getState().accessToken) {
       throw new Error('Not signed in — cannot register wallet DID');
     }
 
-    const [publicKeyJwk, did, providerWalletId] = await Promise.all([
+    const [publicKeyJwk, providerWalletId] = await Promise.all([
       getDevicePublicJwk(),
-      getDeviceDid(),
       getDeviceId(),
     ]);
 
@@ -62,13 +79,15 @@ export const walletDidService = {
       providerWalletId,
     });
 
-    if (result.error) {
-      throw new Error(result.error.message ?? 'Failed to register wallet DID');
+    if (result.error || !result.data) {
+      throw new Error(result.error?.message ?? 'Failed to register wallet DID');
     }
 
-    const registration: DidRegistration = { providerWalletId, did };
-    await SecureStore.setItemAsync(REGISTRATION_KEY, JSON.stringify(registration));
+    // The server is the authority on the identifier it registered — it is what
+    // a verifier resolves, so it is what the proof's `kid` must name.
+    const registration: DidRegistration = { providerWalletId, did: result.data.did };
+    await SecureStore.setItemAsync(REGISTRATION_KEY, JSON.stringify(registration), STORE_OPTIONS);
 
-    return did;
+    return registration.did;
   },
 };

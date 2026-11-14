@@ -11,69 +11,79 @@ import { useAuthStore } from '@/stores/auth-store';
 
 /**
  * Offer accept screen — reached via the deep link `sovport://offer?token=…`
- * (the token is the one-time offer token from the issuer). Confirms with the
- * user, calls VcSdk.acceptOffer, then returns to the wallet home.
+ * (the token is the one-time offer token from the issuer).
+ *
+ * Storing a credential is a state change the holder has to consent to, and a
+ * deep link is external input, so nothing is accepted until the user taps
+ * accept; the screen never accepts on mount.
  */
 export default function OfferScreen() {
   const router = useRouter();
   const { token } = useLocalSearchParams<{ token?: string }>();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'accepting' | 'accepted' | 'failed'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) router.replace('/pair');
+  }, [isAuthenticated, router]);
 
   const accept = useCallback(async () => {
     if (!token) {
       setError('Missing offer token in the link.');
+      setStatus('failed');
       return;
     }
-    if (!isAuthenticated) {
-      router.replace(`/pair`);
-      return;
-    }
-    setLoading(true);
+    setStatus('accepting');
     setError(null);
+
     const result = await credentialService.acceptOffer(token);
-    setLoading(false);
 
     if (result.error) {
       setError(result.error.message ?? 'Failed to accept offer.');
+      setStatus('failed');
       return;
     }
-    setDone(true);
-  }, [token, isAuthenticated, router]);
-
-  useEffect(() => {
-    accept();
-  }, [accept]);
+    setStatus('accepted');
+  }, [token]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
-        {done ? (
+        {status === 'accepted' ? (
           <>
             <ThemedText type="title">Offer accepted</ThemedText>
             <ThemedText themeColor="textSecondary">
               The credential has been added to your wallet.
             </ThemedText>
           </>
-        ) : error ? (
+        ) : status === 'failed' ? (
           <>
             <ThemedText type="title">Could not accept offer</ThemedText>
             <ThemedText themeColor="textSecondary">{error}</ThemedText>
           </>
         ) : (
           <>
-            <ThemedText type="title">Accepting offer…</ThemedText>
-            {loading && <ActivityIndicator />}
+            <ThemedText type="title">Credential offer</ThemedText>
+            <ThemedText themeColor="textSecondary">
+              An issuer wants to put a credential in your wallet. It will be stored on this device
+              only.
+            </ThemedText>
+            {status === 'accepting' && <ActivityIndicator style={styles.spinner} />}
+            <Pressable
+              style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+              onPress={accept}
+              disabled={status === 'accepting'}
+            >
+              <ThemedText style={styles.buttonText}>Accept credential</ThemedText>
+            </Pressable>
           </>
         )}
 
-        <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-          onPress={() => router.replace('/')}
-        >
-          <ThemedText style={styles.buttonText}>Back to wallet</ThemedText>
+        <Pressable onPress={() => router.replace('/')}>
+          <ThemedText type="link">
+            {status === 'accepted' ? 'Back to wallet' : 'Decline'}
+          </ThemedText>
         </Pressable>
       </ThemedView>
     </SafeAreaView>
@@ -90,6 +100,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.three,
     padding: Spacing.four,
+  },
+  spinner: {
+    marginTop: Spacing.two,
   },
   button: {
     backgroundColor: '#4AD3F5',

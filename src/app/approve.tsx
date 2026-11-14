@@ -31,11 +31,14 @@ export default function ApproveScreen() {
     setStatus('approving');
     setError(null);
     try {
-      // Signing is biometric-gated inside signWithDeviceKey.
+      // Sequential on purpose: on a device with no key yet, getDeviceId() creates
+      // it behind its own prompt — running it beside the signing prompt would put
+      // two device-authentication requests in flight at once.
       let deviceId: string;
       let signature: string;
       try {
-        [deviceId, signature] = await Promise.all([getDeviceId(), signWithDeviceKey(challenge)]);
+        deviceId = await getDeviceId();
+        signature = await signWithDeviceKey(challenge);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Could not sign the approval.');
         setStatus('ready');
@@ -57,6 +60,14 @@ export default function ApproveScreen() {
     }
   };
 
+  /** Cancel means "no": tell SovGrant, so the request isn't left approvable. */
+  const handleReject = async () => {
+    if (challenge) {
+      await identity.rejectDeviceApproval(challenge).catch(() => {});
+    }
+    router.replace('/');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
@@ -71,7 +82,7 @@ export default function ApproveScreen() {
             <Pressable style={styles.approveBtn} onPress={handleApprove}>
               <ThemedText style={styles.approveText}>Approve with biometrics</ThemedText>
             </Pressable>
-            <Pressable style={styles.rejectBtn} onPress={() => router.replace('/')}>
+            <Pressable style={styles.rejectBtn} onPress={handleReject}>
               <ThemedText style={styles.rejectText}>Cancel</ThemedText>
             </Pressable>
           </View>

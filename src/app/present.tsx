@@ -8,8 +8,8 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { credentialService } from '@/services/credentials';
 import { credentialVault } from '@/services/credential-vault';
-import { getDeviceDid } from '@/services/device-identity';
 import { presentCredential } from '@/services/presentation';
+import { walletDidService } from '@/services/wallet-did';
 import { useAuthStore } from '@/stores/auth-store';
 
 interface PresentableCredential {
@@ -44,7 +44,7 @@ export default function PresentScreen() {
       const [listRes, held, deviceDid] = await Promise.all([
         credentialService.list(),
         credentialVault.list(),
-        getDeviceDid(),
+        walletDidService.getPresentationDid(),
       ]);
       // Only credentials held on this device can be presented.
       const metaById = new Map((listRes.data ?? []).map((c) => [c.id, c]));
@@ -74,12 +74,18 @@ export default function PresentScreen() {
       return;
     }
 
-    const res = await presentCredential({ sessionId, challenge, credential, did });
-    setPresenting(false);
-    if (res.data) {
-      setResult({ valid: res.data.valid, reason: res.data.reason });
-    } else {
-      setError(res.error?.message ?? 'Presentation failed.');
+    try {
+      // Signing prompts for device authentication; a cancel lands here.
+      const res = await presentCredential({ sessionId, challenge, credential, did });
+      if (res.data) {
+        setResult({ valid: res.data.valid, reason: res.data.reason });
+      } else {
+        setError(res.error?.message ?? 'Presentation failed.');
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Presentation failed.');
+    } finally {
+      setPresenting(false);
     }
   };
 

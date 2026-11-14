@@ -41,6 +41,14 @@ let authSdk: AuthSdk;
 // createZustandTokenStorage wires the SgClient's 401 hook to the Zustand
 // auth store: on a 401 it calls AuthSdk.refresh(), updates the store with the
 // new token bundle, and clears auth on failure.
+//
+// Durable storage goes through the bridge's documented `persist` adapter, which
+// is called with the access token every time the store's tokens change: a
+// rotated bundle is written to SecureStore, a refused one drops the stored
+// session, so the store's memory and the device's storage never disagree. The
+// session is read back out of the store inside the adapter, so the refresh token
+// is persisted without ever being passed *through* the adapter — SecureStore is
+// this platform's secure medium (there is no cookie jar in React Native).
 const tokenStorage = createZustandTokenStorage({
   authStore: {
     getState: () => ({
@@ -52,6 +60,17 @@ const tokenStorage = createZustandTokenStorage({
     clearAuth: () => useAuthStore.getState().clearAuth(),
   },
   sdk: { refresh: (token: string) => authSdk!.refresh(token) },
+  persist: {
+    getAccessToken: () => useAuthStore.getState().accessToken,
+    setAccessToken: (token) => {
+      const store = useAuthStore.getState();
+      if (token === null) {
+        void store.forget().catch(() => {});
+      } else {
+        void store.persist().catch(() => {});
+      }
+    },
+  },
 });
 
 const client = new SgClient({

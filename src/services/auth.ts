@@ -1,12 +1,8 @@
 import { auth, sgClient } from '@/sdk';
 import { credentialVault } from '@/services/credential-vault';
-import { releaseDeviceIdentity } from '@/services/device-identity';
 import { walletDidService } from '@/services/wallet-did';
 import { kv } from '@/lib/kv';
 import { useAuthStore } from '@/stores/auth-store';
-import * as SecureStore from 'expo-secure-store';
-
-const TOKEN_STORAGE_KEY = 'sovport-auth';
 
 /**
  * Auth service — thin wrapper over AuthSdk that keeps the Zustand auth
@@ -51,17 +47,22 @@ export const authService = {
 
   async logout() {
     const { sessionId } = useAuthStore.getState();
-    await auth.logout(sessionId ?? '').catch(() => {});
+    // SovGrant revokes a session by id and rejects an empty one (its schema is
+    // 40–128 chars), so a session we cannot name is cleared locally only, rather
+    // than sent as a request that can only fail.
+    if (sessionId) {
+      await auth.logout(sessionId).catch(() => {});
+    }
     sgClient.setAccessToken(null);
+    await useAuthStore
+      .getState()
+      .forget()
+      .catch(() => {});
     useAuthStore.getState().clearAuth();
-    try {
-      await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
-    } catch {}
 
     // Drop local wallet state so a new account starts clean. The device key
-    // itself is kept (it is the device's identity across sign-ins); only the
-    // in-memory copy of the secret is released.
-    releaseDeviceIdentity();
+    // itself is kept — it is the device's identity across sign-ins, and it is
+    // never held in memory between operations (ADR 0005).
     await credentialVault.clear().catch(() => {});
     await walletDidService.clearRegistration().catch(() => {});
     await kv.remove('sovport-did-skip').catch(() => {});

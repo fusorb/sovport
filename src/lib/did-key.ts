@@ -104,19 +104,26 @@ export function ed25519PublicJwk(publicKey: Uint8Array): Ed25519PublicJwk {
 // ── Detached JWS (EdDSA) ──────────────────────────────────────────────────────
 
 /**
+ * Signs the JWS signing input `${base64url(header)}.${base64url(payload)}`.
+ * Injected rather than passed a raw key so the caller can gate signing behind
+ * device authentication and keep the secret out of this module.
+ */
+export type DetachedJwsSigner = (signingInput: Uint8Array) => Promise<Uint8Array>;
+
+/**
  * Build a detached JWS in the exact shape SovGrant reconstructs:
  *   `${base64url(header)}..${base64url(signature)}`  (payload stripped)
  * with the signature over `${base64url(header)}.${base64url(payload)}`.
  */
-export function buildDetachedEdDsaJws(input: {
+export async function buildDetachedEdDsaJws(input: {
   header: Record<string, unknown>;
   payload: Record<string, unknown>;
-  secretKey: Uint8Array;
-}): string {
+  sign: DetachedJwsSigner;
+}): Promise<string> {
   const headerB64 = toBase64Url(utf8ToBytes(JSON.stringify(input.header)));
   const payloadB64 = toBase64Url(utf8ToBytes(JSON.stringify(input.payload)));
   const signingInput = utf8ToBytes(`${headerB64}.${payloadB64}`);
-  const signature = ed25519Sign(signingInput, input.secretKey);
+  const signature = await input.sign(signingInput);
   return `${headerB64}..${toBase64Url(signature)}`;
 }
 
@@ -133,15 +140,15 @@ export function buildDetachedEdDsaJws(input: {
  * that will be submitted — hashing is deliberately kept out of here so the
  * whole proof shape is unit-testable.
  */
-export function buildPresentationJws(input: {
+export async function buildPresentationJws(input: {
   did: string;
   challenge: string;
   credentialHash: string;
-  secretKey: Uint8Array;
-}): string {
+  sign: DetachedJwsSigner;
+}): Promise<string> {
   return buildDetachedEdDsaJws({
     header: { alg: 'EdDSA', kid: `${input.did}#key-1`, nonce: input.challenge },
     payload: { credentialHash: input.credentialHash },
-    secretKey: input.secretKey,
+    sign: input.sign,
   });
 }

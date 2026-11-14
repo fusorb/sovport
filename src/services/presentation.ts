@@ -15,7 +15,7 @@
 
 import { credentials, type ApiResponse } from '@/sdk';
 import { buildPresentationJws, sha256Base64Url } from '@/lib/crypto';
-import { getDeviceIdentity } from '@/services/device-identity';
+import { signWithDeviceKeyMessage } from '@/services/device-identity';
 import { useAuthStore } from '@/stores/auth-store';
 
 function unauthorized(): ApiResponse<never> {
@@ -25,20 +25,24 @@ function unauthorized(): ApiResponse<never> {
   };
 }
 
-/** Sign the detached JWS proof for one credential presentation. */
+/**
+ * Sign the detached JWS proof for one credential presentation.
+ *
+ * A presentation discloses a credential, so — like device approval — the
+ * signature is produced behind device authentication (ADR 0004/0005).
+ */
 export async function signPresentationProof(input: {
   challenge: string;
   credential: string;
   did: string;
 }): Promise<string> {
-  const { secretKey } = await getDeviceIdentity();
   const credentialHash = await sha256Base64Url(input.credential);
 
   return buildPresentationJws({
     did: input.did,
     challenge: input.challenge,
     credentialHash,
-    secretKey,
+    sign: (message) => signWithDeviceKeyMessage(message, 'Authenticate to present your credential'),
   });
 }
 

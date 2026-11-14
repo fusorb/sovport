@@ -7,6 +7,27 @@ export { type User };
 
 export const TOKEN_STORAGE_KEY = 'sovport-auth';
 
+/**
+ * The session blob holds a live access token and refresh token, so it is written
+ * device-only: it never syncs to a backup and is never restored onto another
+ * device (ADR 0005).
+ */
+const STORE_OPTIONS: SecureStore.SecureStoreOptions = {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+};
+
+/**
+ * SecureStore writes are serialized so a sign-out can never be overtaken by a
+ * write that was still in flight (a token refresh landing right after logout
+ * would otherwise resurrect the session it just dropped).
+ */
+let pendingWrite: Promise<void> = Promise.resolve();
+
+function serialize(write: () => Promise<void>): Promise<void> {
+  pendingWrite = pendingWrite.then(write, write);
+  return pendingWrite;
+}
+
 interface PersistedSession {
   user: User;
   accessToken: string;
@@ -21,8 +42,9 @@ interface PersistedSession {
  * concerns that the framework-agnostic store deliberately omits:
  *
  * - `sessionId` — needed to POST /auth/logout on sign-out.
- * - `persist` / `restore` — SecureStore hydration on launch (the facet-store
- *   has no platform storage; that's a consumer responsibility).
+ * - `persist` / `forget` / `restore` — SecureStore hydration on launch and
+ *   removal on sign-out (the facet-store has no platform storage; that's a
+ *   consumer responsibility).
  *
  * The store's state exposes getState / setTokens / clearAuth; a thin adapter
  * adapts the zustand hook to `TokenStoreLike`, which feeds the sgClient 401
@@ -33,6 +55,8 @@ export interface SovportAuthState extends Omit<AuthState, 'setAuth'> {
   setAuth: (user: User, accessToken: string, refreshToken: string, sessionId?: string) => void;
   /** Persist the current session to the secure store. */
   persist: () => Promise<void>;
+  /** Drop the persisted session (sign-out, or a refresh the server rejected). */
+  forget: () => Promise<void>;
   /** Restore a persisted session on launch. Returns true if one was found. */
   restore: () => Promise<boolean>;
 }
@@ -79,21 +103,24 @@ export const useAuthStore = create<SovportAuthState>((set, get) => ({
 
   setError: (error) => set({ error }),
 
-  persist: async () => {
-    const { user, accessToken, refreshToken, sessionId } = get();
-    if (!user || !accessToken) return;
-    const session: PersistedSession = {
-      user,
-      accessToken,
-      refreshToken: refreshToken ?? '',
-      sessionId: sessionId ?? undefined,
-    };
-    await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, JSON.stringify(session));
-  },
+  persist: () =>
+    serialize(async () => {
+      const { user, accessToken, refreshToken, sessionId } = get();
+      if (!user || !accessToken) return;
+      const session: PersistedSession = {
+        user,
+        accessToken,
+        refreshToken: refreshToken ?? '',
+        sessionId: sessionId ?? undefined,
+      };
+      await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, JSON.stringify(session), STORE_OPTIONS);
+    }),
+
+  forget: () => serialize(() => SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY, STORE_OPTIONS)),
 
   restore: async () => {
     try {
-      const raw = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY);
+      const raw = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY, STORE_OPTIONS);
       if (!raw) return false;
       const parsed = JSON.parse(raw) as PersistedSession;
       if (!parsed.accessToken || !parsed.user) return false;
@@ -106,7 +133,9 @@ export const useAuthStore = create<SovportAuthState>((set, get) => ({
       });
       return true;
     } catch {
-      await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY).catch(() => {});
+      await get()
+        .forget()
+        .catch(() => {});
       return false;
     } finally {
       set({ isLoading: false });

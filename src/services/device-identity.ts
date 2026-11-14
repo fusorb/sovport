@@ -5,7 +5,8 @@
 //   - the wallet did:key (public JWK registered for credential presentation).
 //
 // The private key never leaves the device; only the public key is ever sent to
-// SovGrant. Key creation and signing are gated behind device biometrics.
+// SovGrant. It is decoded for the duration of a signing call and never cached,
+// and every signing call is gated behind device authentication.
 
 import * as SecureStore from 'expo-secure-store';
 
@@ -24,36 +25,82 @@ import {
 
 const STORE_KEY = 'sovport-device-key';
 
+/**
+ * The device key *is* this installation's identity, so it is stored device-only:
+ * it never syncs to a backup and is never restored onto another device (ADR
+ * 0005). iOS is the platform that distinguishes the two; Android keys are
+ * Keystore-bound either way.
+ */
+const STORE_OPTIONS: SecureStore.SecureStoreOptions = {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+};
+
 interface StoredDeviceIdentity {
   secretKey: string;
   publicKey: string;
   deviceId: string;
 }
 
-export interface DeviceIdentity {
-  secretKey: Uint8Array;
+/** The public half of the device identity — the only part held in memory. */
+interface DevicePublicIdentity {
   publicKey: Uint8Array;
   deviceId: string;
 }
 
-let cache: DeviceIdentity | null = null;
+let cache: DevicePublicIdentity | null = null;
+let inFlight: Promise<DevicePublicIdentity> | null = null;
 
-function decode(stored: StoredDeviceIdentity): DeviceIdentity {
-  return {
-    secretKey: fromBase64Url(stored.secretKey),
-    publicKey: fromBase64Url(stored.publicKey),
-    deviceId: stored.deviceId,
-  };
+function parseRecord(raw: string): StoredDeviceIdentity | null {
+  try {
+    const record = JSON.parse(raw) as Partial<StoredDeviceIdentity>;
+    if (!record.secretKey || !record.publicKey || !record.deviceId) return null;
+    return { secretKey: record.secretKey, publicKey: record.publicKey, deviceId: record.deviceId };
+  } catch {
+    return null;
+  }
 }
 
-/** Load the device identity, generating it on first use. */
-export async function getDeviceIdentity(): Promise<DeviceIdentity> {
+/**
+ * Rewrite a record so it carries the device-only keychain class. Keychain
+ * accessibility cannot be changed by an update, so the item has to be replaced —
+ * this runs at most once per launch, on the load path where the public identity
+ * is cached. Best-effort: a failure leaves the record readable.
+ */
+async function hardenStoredRecord(raw: string): Promise<void> {
+  try {
+    await SecureStore.deleteItemAsync(STORE_KEY, STORE_OPTIONS);
+    await SecureStore.setItemAsync(STORE_KEY, raw, STORE_OPTIONS);
+  } catch {
+    // The record stays readable with its previous accessibility class.
+  }
+}
+
+/**
+ * Load the device identity, generating it on first use.
+ *
+ * Single-flight: callers ask for the device id and the public JWK together
+ * (pairing, DID registration), and two concurrent generations would leave the
+ * registration holding a key the store no longer contains.
+ */
+async function loadPublicIdentity(): Promise<DevicePublicIdentity> {
   if (cache) return cache;
 
-  const raw = await SecureStore.getItemAsync(STORE_KEY);
+  inFlight ??= createOrLoadIdentity().finally(() => {
+    inFlight = null;
+  });
+
+  return inFlight;
+}
+
+async function createOrLoadIdentity(): Promise<DevicePublicIdentity> {
+  const raw = await SecureStore.getItemAsync(STORE_KEY, STORE_OPTIONS);
   if (raw) {
-    cache = decode(JSON.parse(raw) as StoredDeviceIdentity);
-    return cache;
+    const record = parseRecord(raw);
+    if (record) {
+      cache = { publicKey: fromBase64Url(record.publicKey), deviceId: record.deviceId };
+      await hardenStoredRecord(raw);
+      return cache;
+    }
   }
 
   const unlocked = await unlockWithBiometrics('Create your SovPort device key');
@@ -70,49 +117,58 @@ export async function getDeviceIdentity(): Promise<DeviceIdentity> {
     publicKey: toBase64Url(publicKey),
     deviceId,
   };
-  await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(stored));
+  await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(stored), STORE_OPTIONS);
 
-  cache = { secretKey, publicKey, deviceId };
+  cache = { publicKey, deviceId };
   return cache;
 }
 
 /** Stable per-device id (opaque to SovGrant; used as the wallet's provider id). */
 export async function getDeviceId(): Promise<string> {
-  return (await getDeviceIdentity()).deviceId;
+  return (await loadPublicIdentity()).deviceId;
 }
 
 /** Public JWK for wallet-DID registration. */
 export async function getDevicePublicJwk(): Promise<Ed25519PublicJwk> {
-  return ed25519PublicJwk((await getDeviceIdentity()).publicKey);
+  return ed25519PublicJwk((await loadPublicIdentity()).publicKey);
 }
 
 /** The device's did:key — the identifier it presents credentials with. */
 export async function getDeviceDid(): Promise<string> {
-  return didKeyFromEd25519((await getDeviceIdentity()).publicKey);
+  return didKeyFromEd25519((await loadPublicIdentity()).publicKey);
 }
 
-/** Ed25519-sign a challenge (base64url signature), gated behind biometrics. */
-export async function signWithDeviceKey(challenge: string): Promise<string> {
-  const unlocked = await unlockWithBiometrics('Authenticate with your device key');
+/**
+ * Sign a message with the device key, behind device authentication. The secret
+ * is read from the secure store for this call only — never cached — so no
+ * decrypted copy outlives the operation.
+ */
+async function signWithDeviceKeyBytes(message: Uint8Array, prompt: string): Promise<Uint8Array> {
+  const unlocked = await unlockWithBiometrics(prompt);
   if (!unlocked) {
     throw new Error('A device lock (passcode or biometrics) is required to sign');
   }
 
-  const { secretKey } = await getDeviceIdentity();
-  return toBase64Url(ed25519Sign(utf8ToBytes(challenge), secretKey));
+  const raw = await SecureStore.getItemAsync(STORE_KEY, STORE_OPTIONS);
+  const record = raw ? parseRecord(raw) : null;
+  if (!record) {
+    throw new Error('This device has no key yet — connect your account first');
+  }
+
+  return ed25519Sign(message, fromBase64Url(record.secretKey));
 }
 
-/** Drop the device identity (e.g. on disconnect). */
-export async function clearDeviceIdentity(): Promise<void> {
-  cache = null;
-  await SecureStore.deleteItemAsync(STORE_KEY);
+/** Ed25519-sign an approval challenge (base64url signature). */
+export async function signWithDeviceKey(challenge: string): Promise<string> {
+  return toBase64Url(
+    await signWithDeviceKeyBytes(utf8ToBytes(challenge), 'Authenticate with your device key'),
+  );
 }
 
-/**
- * Drop the in-memory copy of the device key. The key stays in the secure store,
- * so the device keeps its identity across sign-ins; this only limits how long
- * the decrypted secret sits in RAM after sign-out.
- */
-export function releaseDeviceIdentity(): void {
-  cache = null;
+/** Sign an arbitrary JWS signing input with the device key (same gate). */
+export function signWithDeviceKeyMessage(
+  message: Uint8Array,
+  prompt?: string,
+): Promise<Uint8Array> {
+  return signWithDeviceKeyBytes(message, prompt ?? 'Authenticate with your device key');
 }

@@ -52,11 +52,15 @@ describe('did:key', () => {
 });
 
 describe('detached JWS', () => {
-  it('serializes as `header..signature` and signs header.payload', () => {
+  it('serializes as `header..signature` and signs header.payload', async () => {
     const header = { alg: 'EdDSA', kid: 'did:key:z6Mkexample#key-1', nonce: 'abc123' };
     const payload = { credentialHash: 'sometokenhash' };
 
-    const jws = buildDetachedEdDsaJws({ header, payload, secretKey: hexToBytes(SECRET) });
+    const jws = await buildDetachedEdDsaJws({
+      header,
+      payload,
+      sign: async (input) => ed25519Sign(input, hexToBytes(SECRET)),
+    });
     const [headerPart, payloadPart, signaturePart] = jws.split('.');
 
     assert.equal(payloadPart, '');
@@ -74,15 +78,15 @@ describe('detached JWS', () => {
 describe('presentation proof JWS', () => {
   const DID = didKeyFromEd25519(hexToBytes(PUBLIC));
 
-  it('binds the did:key, challenge and credential hash, and verifies', () => {
+  it('binds the did:key, challenge and credential hash, and verifies', async () => {
     const challenge = 'session-challenge-123';
     const credentialHash = 'aGVsbG8';
 
-    const jws = buildPresentationJws({
+    const jws = await buildPresentationJws({
       did: DID,
       challenge,
       credentialHash,
-      secretKey: hexToBytes(SECRET),
+      sign: async (input) => ed25519Sign(input, hexToBytes(SECRET)),
     });
     const [headerPart, payloadPart, signaturePart] = jws.split('.');
 
@@ -103,12 +107,12 @@ describe('presentation proof JWS', () => {
     );
   });
 
-  it('does not verify against a different credential hash', () => {
-    const jws = buildPresentationJws({
+  it('does not verify against a different credential hash', async () => {
+    const jws = await buildPresentationJws({
       did: DID,
       challenge: 'c',
       credentialHash: 'hash-a',
-      secretKey: hexToBytes(SECRET),
+      sign: async (input) => ed25519Sign(input, hexToBytes(SECRET)),
     });
     const [headerPart, , signaturePart] = jws.split('.');
 
