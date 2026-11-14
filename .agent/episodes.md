@@ -348,3 +348,37 @@ Lesson: a gate is only as real as the lifecycle event that triggers it -- lock o
   can only fail while the session stays alive.
 
 ================================================================================
+
+(native token-storage extraction) -- 2026-11-14
+
+What happened:
+  SovPort's React Native SecureStore token-storage adapter moved into facet as
+  `@fusorb/facet-store/native` (`createSecureAuthStore` +
+  `createSecurePersistAdapter`), published as `@fusorb/facet-store@1.1.0`.
+
+How we fixed it:
+  -- Added the `/native` subpath to `@fusorb/facet-store` with an injected
+     `SecureStoreBackend` (getItemAsync / setItemAsync / deleteItemAsync) so the
+     store stays framework-agnostic -- no expo dependency in facet.
+  -- SovPort's `src/stores/auth-store.ts` shrank to a thin shim that injects
+     `expo-secure-store` + `WHEN_UNLOCKED_THIS_DEVICE_ONLY` (ADR 0005);
+     `src/sdk/index.ts` now passes `createSecurePersistAdapter(useAuthStore)`.
+  -- Bumped `@fusorb/facet-store` 1.0.6 -> 1.1.0 and synced SYNC.md +
+     `pnpm-workspace.yaml` supply-chain pins.
+
+What survived / changed boundary:
+  The prior "wallet owns only its SecureStore adapter, because facet ships no
+  React Native storage adapter" is now inverted: facet owns the adapter, and the
+  wallet owns only the platform backend choice. The refresh token is still never
+  passed through the PersistAdapter signature -- it is read out of the store.
+
+State: committed `c007a94` in sovport (facet side committed + published as 1.1.0).
+  Checks green: typecheck / lint / test / format:check / check:docs, plus
+  facet-store vitest. On-device auth -> pair -> MFA -> device-approval smoke is
+  still the last manual validation.
+
+Lesson: a platform seam in a framework-agnostic package is safer as an injected
+  backend than a hard-coded default -- it keeps the package dependency-free and
+  makes each consumer name its secure medium explicitly.
+
+================================================================================

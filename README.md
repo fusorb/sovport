@@ -23,7 +23,7 @@ Self-sovereign identity wallet for the Fusorb ecosystem. Built with Expo 57 + Re
 └─────────────────┘               └──────────────────────┘
 ```
 
-SovPort consumes **`@fusorb/facet-sdk`** — the published, framework-agnostic TypeScript fetch client that wraps the SovGrant API. It covers auth, credentials (VCs), DIDs, onboarding, passkeys, tenants, billing, webhooks, audit, and IdP. The SDK is pure fetch (no DOM / no React), so it runs in React Native unchanged; only the token-storage adapter is swapped for `expo-secure-store`.
+SovPort consumes **`@fusorb/facet-sdk`** — the published, framework-agnostic TypeScript fetch client that wraps the SovGrant API. It covers auth, credentials (VCs), DIDs, onboarding, passkeys, tenants, billing, webhooks, audit, and IdP. The SDK is pure fetch (no DOM / no React), so it runs in React Native unchanged. The token-storage adapter ships in `@fusorb/facet-store/native`; SovPort injects `expo-secure-store` as the secure backend.
 
 **Important:** `@fusorb/facet-components` / `@fusorb/facet-auth` / `@fusorb/facet-layout` are **web-only** (Radix + DOM + Tailwind). They do **not** run in React Native. SovPort owns its native screens and uses the SDK for all server communication.
 
