@@ -43,7 +43,7 @@ All keys and signatures use **Ed25519** via `@noble/curves` (pure JS, no `crypto
 ## Prerequisites
 
 - Node.js >= 22
-- pnpm 12 (`packageManager` pins `pnpm@12.18.0`)
+- pnpm 12 (`packageManager` pins `pnpm@12.21.0`)
 - [SovGrant](https://github.com/fusorb/sovgrant) backend running locally (or a shared dev instance)
 
 ## Getting Started
