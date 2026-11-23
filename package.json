@@ -2,7 +2,7 @@
   "name": "sovport",
   "version": "1.0.0",
   "main": "expo-router/entry",
-  "packageManager": "pnpm@12.18.0",
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
